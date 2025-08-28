@@ -1,5 +1,6 @@
 package com.example.SecondEcomWeNiraj.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ public class User {
     private String email;
 
     @NotBlank
+    @JsonIgnore
     private String password;
 
     @NotBlank
@@ -42,6 +44,7 @@ public class User {
     private boolean enabled = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Order> orders;
 
     @CreationTimestamp

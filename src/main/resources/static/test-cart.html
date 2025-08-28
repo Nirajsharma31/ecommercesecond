@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Test Page</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="index.html"><h2>E-Shop - Cart Test</h2></a>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item" id="auth-nav">
+                        <a href="login.html" class="nav-link">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="padding: 50px 20px;">
+        <h1>Cart Functionality Test</h1>
+        
+        <div style="margin: 20px 0;">
+            <h3>Current User Status:</h3>
+            <div id="user-status">Loading...</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Test Actions:</h3>
+            <button onclick="testLogin()" style="margin: 5px; padding: 10px;">Test Login</button>
+            <button onclick="testAddToCart()" style="margin: 5px; padding: 10px;">Test Add to Cart</button>
+            <button onclick="debugCart()" style="margin: 5px; padding: 10px;">Debug Cart</button>
+            <button onclick="testCartAPI()" style="margin: 5px; padding: 10px;">Test Cart API</button>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <h3>Test Results:</h3>
+            <div id="test-results" style="background: #f5f5f5; padding: 15px; border-radius: 5px; min-height: 100px;">
+                Results will appear here...
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserStatus();
+            checkAuthStatus();
+        });
+
+        function updateUserStatus() {
+            const user = getCurrentUser();
+            const statusDiv = document.getElementById('user-status');
+            
+            if (user) {
+                statusDiv.innerHTML = `
+                    <p><strong>Logged in as:</strong> ${user.username}</p>
+                    <p><strong>Name:</strong> ${user.firstName} ${user.lastName}</p>
+                    <p><strong>Role:</strong> ${user.role}</p>
+                    <p><strong>User ID:</strong> ${user.id}</p>
+                `;
+            } else {
+                statusDiv.innerHTML = '<p><strong>Not logged in</strong></p>';
+            }
+        }
+
+        async function testLogin() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin@eshop.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    updateUserStatus();
+                    resultsDiv.innerHTML = `
+                        <p><strong>Login Success!</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <p><strong>Login Failed:</strong> ${data.message}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p><strong>Login Error:</strong> ${error.message}</p>`;
+            }
+        }
+
+        async function testAddToCart() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = 'Testing add to cart...';
+            
+            const user = getCurrentUser();
+            if (!user) {
+                resultsDiv.innerHTML = '<p><strong>Error:</strong> Please login first</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: 1,
+                        quantity: 1
+                    })
+                });
+                
+                const data = await response.json();
+                resultsDiv.innerHTML = `
+                    <p><strong>Add to Cart Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p><strong>Add to Cart Error:</strong> ${error.message}</p>`;
+            }
+        }
+
+        async function testCartAPI() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = 'Testing cart API endpoints...';
+            
+            const user = getCurrentUser();
+            if (!user) {
+                resultsDiv.innerHTML = '<p><strong>Error:</strong> Please login first</p>';
+                return;
+            }
+            
+            try {
+                // Test debug endpoint
+                const debugResponse = await fetch(`${API_BASE_URL}/cart/debug-add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: 1,
+                        quantity: 1
+                    })
+                });
+                
+                const debugData = await debugResponse.json();
+                
+                // Test cart test endpoint
+                const testResponse = await fetch(`${API_BASE_URL}/cart/test/${user.id}`);
+                const testData = await testResponse.json();
+                
+                resultsDiv.innerHTML = `
+                    <p><strong>Debug Endpoint Response:</strong></p>
+                    <pre>${JSON.stringify(debugData, null, 2)}</pre>
+                    <p><strong>Test Endpoint Response:</strong></p>
+                    <pre>${JSON.stringify(testData, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p><strong>API Test Error:</strong> ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

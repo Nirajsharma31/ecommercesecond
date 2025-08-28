@@ -256,4 +256,40 @@ public class CartController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    @PostMapping("/debug-add")
+    public ResponseEntity<?> debugAddToCart(@RequestBody Map<String, Object> request) {
+        try {
+            System.out.println("=== DEBUG ADD TO CART ===");
+            System.out.println("Request received: " + request);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Debug endpoint working");
+            response.put("receivedData", request);
+            
+            // Check if required fields are present
+            if (!request.containsKey("userId")) {
+                response.put("error", "Missing userId");
+                response.put("success", false);
+            }
+            if (!request.containsKey("productId")) {
+                response.put("error", "Missing productId");
+                response.put("success", false);
+            }
+            if (!request.containsKey("quantity")) {
+                response.put("error", "Missing quantity");
+                response.put("success", false);
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("Debug endpoint error: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Debug failed: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
 }

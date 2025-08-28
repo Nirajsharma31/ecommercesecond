@@ -1,5 +1,6 @@
 package com.example.SecondEcomWeNiraj.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
+    @JsonBackReference
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)

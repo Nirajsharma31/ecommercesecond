@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .info {
+            color: blue;
+        }
+        #console-output {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cart Fix Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Authentication Test</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="testLogout()">Test Logout</button>
+        <button onclick="checkCurrentUser()">Check Current User</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Cart Operations Test</h2>
+        <button onclick="testAddToCart()">Test Add to Cart</button>
+        <button onclick="testGetCart()">Test Get Cart</button>
+        <button onclick="testCartCount()">Test Cart Count</button>
+        <button onclick="clearLocalCart()">Clear Local Cart</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Server Communication Test</h2>
+        <button onclick="testApiHealth()">Test API Health</button>
+        <button onclick="testDebugEndpoint()">Test Debug Endpoint</button>
+        <button onclick="testCartEndpoint()">Test Cart Endpoint</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <button onclick="clearConsole()">Clear Console</button>
+        <div id="console-output"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Override console.log to display in our custom console
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        function logToCustomConsole(message, type = 'info') {
+            const consoleOutput = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            consoleOutput.textContent += logEntry;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToCustomConsole(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToCustomConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            logToCustomConsole(args.join(' '), 'warn');
+        };
+        
+        function clearConsole() {
+            document.getElementById('console-output').textContent = '';
+        }
+        
+        // Test functions
+        async function testLogin() {
+            console.log('=== TESTING LOGIN ===');
+            
+            // Create a test user session
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            console.log('Test user logged in:', testUser);
+            checkAuthStatus();
+        }
+        
+        function testLogout() {
+            console.log('=== TESTING LOGOUT ===');
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            console.log('User logged out');
+            checkAuthStatus();
+        }
+        
+        function checkCurrentUser() {
+            console.log('=== CHECKING CURRENT USER ===');
+            const user = getCurrentUser();
+            console.log('Current user:', user);
+        }
+        
+        async function testAddToCart() {
+            console.log('=== TESTING ADD TO CART ===');
+            
+            // Test with sample product data
+            const productId = 1;
+            const productName = 'Test Product';
+            const productPrice = 29.99;
+            const quantity = 1;
+            
+            try {
+                await addToCart(productId, productName, productPrice, quantity);
+                console.log('Add to cart test completed');
+            } catch (error) {
+                console.error('Add to cart test failed:', error);
+            }
+        }
+        
+        async function testGetCart() {
+            console.log('=== TESTING GET CART ===');
+            
+            try {
+                const cart = await getCart();
+                console.log('Cart contents:', cart);
+                console.log('Cart items count:', cart.length);
+            } catch (error) {
+                console.error('Get cart test failed:', error);
+            }
+        }
+        
+        async function testCartCount() {
+            console.log('=== TESTING CART COUNT ===');
+            
+            try {
+                await updateCartCount();
+                console.log('Cart count updated');
+            } catch (error) {
+                console.error('Cart count test failed:', error);
+            }
+        }
+        
+        function clearLocalCart() {
+            console.log('=== CLEARING LOCAL CART ===');
+            localStorage.removeItem('cart');
+            console.log('Local cart cleared');
+            updateCartCount();
+        }
+        
+        async function testApiHealth() {
+            console.log('=== TESTING API HEALTH ===');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                console.log('API Health Response:', data);
+            } catch (error) {
+                console.error('API Health test failed:', error);
+            }
+        }
+        
+        async function testDebugEndpoint() {
+            console.log('=== TESTING DEBUG ENDPOINT ===');
+            
+            const user = getCurrentUser();
+            if (!user) {
+                console.error('No user logged in. Please test login first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/debug-add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: 1,
+                        quantity: 1
+                    })
+                });
+                
+                const responseText = await response.text();
+                console.log('Debug endpoint raw response:', responseText);
+                
+                try {
+                    const data = JSON.parse(responseText);
+                    console.log('Debug endpoint parsed response:', data);
+                } catch (parseError) {
+                    console.error('Failed to parse debug response as JSON:', parseError);
+                }
+            } catch (error) {
+                console.error('Debug endpoint test failed:', error);
+            }
+        }
+        
+        async function testCartEndpoint() {
+            console.log('=== TESTING CART ENDPOINT ===');
+            
+            const user = getCurrentUser();
+            if (!user) {
+                console.error('No user logged in. Please test login first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
+                const responseText = await response.text();
+                console.log('Cart endpoint raw response:', responseText);
+                
+                try {
+                    const data = JSON.parse(responseText);
+                    console.log('Cart endpoint parsed response:', data);
+                } catch (parseError) {
+                    console.error('Failed to parse cart response as JSON:', parseError);
+                }
+            } catch (error) {
+                console.error('Cart endpoint test failed:', error);
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Cart Fix Test Page loaded');
+            console.log('API Base URL:', API_BASE_URL);
+            checkCurrentUser();
+        });
+    </script>
+</body>
+</html>

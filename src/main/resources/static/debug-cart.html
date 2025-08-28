@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cart Issues</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-panel h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        button.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .log-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Cart Debug Tool</h1>
+    <p>This tool helps diagnose add-to-cart issues. Follow the steps below:</p>
+
+    <div class="grid">
+        <div class="debug-panel">
+            <h3>1. Server Connection</h3>
+            <button onclick="testServerConnection()">Test Server</button>
+            <button onclick="testApiHealth()">Test API Health</button>
+            <div id="server-status"></div>
+        </div>
+
+        <div class="debug-panel">
+            <h3>2. Authentication</h3>
+            <button onclick="createTestUser()">Create Test User</button>
+            <button onclick="checkUserStatus()">Check User Status</button>
+            <button onclick="clearUser()" class="danger">Clear User</button>
+            <div id="auth-status"></div>
+        </div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>3. Cart Operations</h3>
+        <button onclick="testLocalCart()">Test Local Cart</button>
+        <button onclick="testServerCart()">Test Server Cart</button>
+        <button onclick="testAddToCart()">Test Add to Cart</button>
+        <button onclick="clearAllCarts()" class="danger">Clear All Carts</button>
+        <div id="cart-status"></div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>4. Raw API Testing</h3>
+        <button onclick="testRawAddToCart()">Raw Add to Cart API</button>
+        <button onclick="testGetCartAPI()">Raw Get Cart API</button>
+        <button onclick="testDebugEndpoint()">Debug Endpoint</button>
+        <div id="api-status"></div>
+    </div>
+
+    <div class="debug-panel">
+        <h3>5. Console Output</h3>
+        <button onclick="clearLog()" class="warning">Clear Log</button>
+        <div id="console-log" class="log-output">Ready for testing...\n</div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Enhanced logging
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('console-log');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Also log to browser console
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function clearLog() {
+            document.getElementById('console-log').textContent = 'Log cleared...\n';
+        }
+
+        // Test functions
+        async function testServerConnection() {
+            log('Testing server connection...');
+            try {
+                const response = await fetch('http://localhost:8080');
+                if (response.ok) {
+                    log('✅ Server is running', 'success');
+                    setStatus('server-status', 'Server is running and accessible', 'success');
+                } else {
+                    log(`❌ Server responded with status: ${response.status}`, 'error');
+                    setStatus('server-status', `Server error: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Server connection failed: ${error.message}`, 'error');
+                setStatus('server-status', 'Server is not running or not accessible', 'error');
+            }
+        }
+
+        async function testApiHealth() {
+            log('Testing API health endpoint...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ API Health: ${JSON.stringify(data)}`, 'success');
+                    setStatus('server-status', 'API is healthy', 'success');
+                } else {
+                    log(`❌ API health check failed: ${response.status}`, 'error');
+                    setStatus('server-status', 'API health check failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ API health error: ${error.message}`, 'error');
+                setStatus('server-status', 'API is not accessible', 'error');
+            }
+        }
+
+        function createTestUser() {
+            log('Creating test user...');
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            log('✅ Test user created and logged in', 'success');
+            setStatus('auth-status', 'Test user logged in', 'success');
+            checkAuthStatus(); // Update UI
+        }
+
+        function checkUserStatus() {
+            log('Checking user status...');
+            const user = getCurrentUser();
+            if (user) {
+                log(`✅ User logged in: ${user.username} (ID: ${user.id})`, 'success');
+                setStatus('auth-status', `Logged in as: ${user.username}`, 'success');
+            } else {
+                log('❌ No user logged in', 'warning');
+                setStatus('auth-status', 'Not logged in', 'error');
+            }
+        }
+
+        function clearUser() {
+            log('Clearing user session...');
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            log('✅ User session cleared', 'success');
+            setStatus('auth-status', 'User logged out', 'info');
+            checkAuthStatus(); // Update UI
+        }
+
+        async function testLocalCart() {
+            log('Testing local cart...');
+            
+            // Add test item to local cart
+            const testItem = {
+                id: 999,
+                name: 'Test Product',
+                price: 19.99,
+                quantity: 1,
+                image: 'test-image.jpg'
+            };
+            
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            cart.push(testItem);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            log(`✅ Added test item to local cart. Cart now has ${cart.length} items`, 'success');
+            setStatus('cart-status', `Local cart has ${cart.length} items`, 'success');
+            
+            await updateCartCount();
+        }
+
+        async function testServerCart() {
+            log('Testing server cart...');
+            const user = getCurrentUser();
+            
+            if (!user) {
+                log('❌ No user logged in for server cart test', 'error');
+                setStatus('cart-status', 'Need to login first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
+                const responseText = await response.text();
+                
+                log(`Server cart response (${response.status}): ${responseText}`);
+                
+                if (response.ok) {
+                    try {
+                        const cartData = JSON.parse(responseText);
+                        log(`✅ Server cart loaded: ${JSON.stringify(cartData)}`, 'success');
+                        setStatus('cart-status', 'Server cart accessible', 'success');
+                    } catch (parseError) {
+                        log(`❌ Failed to parse server cart response: ${parseError.message}`, 'error');
+                        setStatus('cart-status', 'Server cart response format error', 'error');
+                    }
+                } else {
+                    log(`❌ Server cart request failed: ${response.status}`, 'error');
+                    setStatus('cart-status', 'Server cart not accessible', 'error');
+                }
+            } catch (error) {
+                log(`❌ Server cart error: ${error.message}`, 'error');
+                setStatus('cart-status', 'Server cart connection failed', 'error');
+            }
+        }
+
+        async function testAddToCart() {
+            log('Testing add to cart function...');
+            
+            try {
+                await addToCart(1, 'Test Product', 29.99, 1);
+                log('✅ Add to cart function completed', 'success');
+                setStatus('cart-status', 'Add to cart test completed', 'success');
+            } catch (error) {
+                log(`❌ Add to cart failed: ${error.message}`, 'error');
+                setStatus('cart-status', 'Add to cart failed', 'error');
+            }
+        }
+
+        async function testRawAddToCart() {
+            log('Testing raw add to cart API...');
+            const user = getCurrentUser();
+            
+            if (!user) {
+                log('❌ No user logged in for raw API test', 'error');
+                setStatus('api-status', 'Need to login first', 'error');
+                return;
+            }
+            
+            const requestBody = {
+                userId: user.id,
+                productId: 1,
+                quantity: 1
+            };
+            
+            log(`Sending request: ${JSON.stringify(requestBody)}`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const responseText = await response.text();
+                log(`Raw API response (${response.status}): ${responseText}`);
+                
+                if (response.ok) {
+                    try {
+                        const result = JSON.parse(responseText);
+                        log(`✅ Raw API success: ${JSON.stringify(result)}`, 'success');
+                        setStatus('api-status', 'Raw API call successful', 'success');
+                    } catch (parseError) {
+                        log(`❌ Failed to parse API response: ${parseError.message}`, 'error');
+                        setStatus('api-status', 'API response format error', 'error');
+                    }
+                } else {
+                    log(`❌ Raw API failed: ${response.status}`, 'error');
+                    setStatus('api-status', 'Raw API call failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Raw API error: ${error.message}`, 'error');
+                setStatus('api-status', 'Raw API connection failed', 'error');
+            }
+        }
+
+        async function testGetCartAPI() {
+            log('Testing get cart API...');
+            const user = getCurrentUser();
+            
+            if (!user) {
+                log('❌ No user logged in for get cart API test', 'error');
+                setStatus('api-status', 'Need to login first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
+                const responseText = await response.text();
+                
+                log(`Get cart API response (${response.status}): ${responseText}`);
+                
+                if (response.ok) {
+                    setStatus('api-status', 'Get cart API working', 'success');
+                } else {
+                    setStatus('api-status', 'Get cart API failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Get cart API error: ${error.message}`, 'error');
+                setStatus('api-status', 'Get cart API connection failed', 'error');
+            }
+        }
+
+        async function testDebugEndpoint() {
+            log('Testing debug endpoint...');
+            const user = getCurrentUser();
+            
+            if (!user) {
+                log('❌ No user logged in for debug endpoint test', 'error');
+                setStatus('api-status', 'Need to login first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/debug-add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: 1,
+                        quantity: 1
+                    })
+                });
+                
+                const responseText = await response.text();
+                log(`Debug endpoint response (${response.status}): ${responseText}`);
+                
+                if (response.ok) {
+                    setStatus('api-status', 'Debug endpoint working', 'success');
+                } else {
+                    setStatus('api-status', 'Debug endpoint failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Debug endpoint error: ${error.message}`, 'error');
+                setStatus('api-status', 'Debug endpoint connection failed', 'error');
+            }
+        }
+
+        function clearAllCarts() {
+            log('Clearing all carts...');
+            localStorage.removeItem('cart');
+            log('✅ All carts cleared', 'success');
+            setStatus('cart-status', 'All carts cleared', 'info');
+            updateCartCount();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Debug tool loaded');
+            log(`API Base URL: ${API_BASE_URL}`);
+            checkUserStatus();
+        });
+    </script>
+</body>
+</html>

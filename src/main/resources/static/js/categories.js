@@ -75,9 +75,9 @@ function displayCategoryProducts(products) {
     productsGrid.innerHTML = products.map(product => `
         <div class="product-card">
             <div class="product-image">
-                <img src="${product.imageUrl || 'https://via.placeholder.com/300x200'}" 
+                <img src="${product.imageUrl || `data:image/svg+xml;charset=UTF-8,%3Csvg width='300' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='300' height='200' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`}" 
                      alt="${product.name}"
-                     onerror="this.src='https://via.placeholder.com/300x200'">
+                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg width=\\'300\\' height=\\'200\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Crect width=\\'300\\' height=\\'200\\' fill=\\'%23f5f5f5\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' font-family=\\'Arial\\' font-size=\\'16\\' fill=\\'%23999\\' text-anchor=\\'middle\\' dy=\\'.3em\\'%3ENo Image%3C/text%3E%3C/svg%3E'">
             </div>
             <h3>${product.name}</h3>
             <p>${product.description || 'No description available'}</p>
