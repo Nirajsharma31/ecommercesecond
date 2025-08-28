@@ -184,7 +184,7 @@ function displayCategoriesTable(categories) {
             <td>${category.id}</td>
             <td>${category.name}</td>
             <td>${category.description || 'N/A'}</td>
-            <td>${category.products ? category.products.length : 0}</td>
+            <td>${category.productCount || 0}</td>
             <td>
                 <button class="action-btn edit-btn" onclick="editCategory(${category.id})">Edit</button>
                 <button class="action-btn delete-btn" onclick="deleteCategory(${category.id})">Delete</button>
@@ -604,23 +604,23 @@ async function deleteAllProducts() {
 async function debugProducts() {
     try {
         showNotification('Checking product images...', 'info');
-        
+
         const response = await fetch(`${API_BASE_URL}/admin/debug-products`);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const result = await response.json();
         console.log('Debug result:', result);
-        
+
         if (result.success) {
             const products = result.products;
             const problemProducts = products.filter(p => !p.hasImage || p.isPlaceholder);
-            
+
             console.log('All products:', products);
             console.log('Products with image issues:', problemProducts);
-            
+
             if (problemProducts.length > 0) {
                 showNotification(`Found ${problemProducts.length} products with image issues. Check console for details.`, 'error');
                 console.table(problemProducts);
@@ -630,7 +630,7 @@ async function debugProducts() {
         } else {
             showNotification(`Error: ${result.message}`, 'error');
         }
-        
+
     } catch (error) {
         console.error('Error debugging products:', error);
         showNotification(`Error debugging products: ${error.message}`, 'error');
@@ -640,37 +640,37 @@ async function debugProducts() {
 // Fix product images
 async function fixProductImages() {
     const confirmed = confirm('This will fix products that have placeholder or missing image URLs.\n\nProducts with placeholder images will be set to use the frontend default placeholder.\n\nContinue?');
-    
+
     if (!confirmed) {
         return;
     }
-    
+
     try {
         showNotification('Fixing product images...', 'info');
-        
+
         const response = await fetch(`${API_BASE_URL}/admin/fix-product-images`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const result = await response.json();
         console.log('Fix result:', result);
-        
+
         if (result.success) {
             showNotification(`Successfully fixed ${result.fixedCount} products!`, 'success');
-            
+
             // Reload the products table
             await loadProducts();
         } else {
             showNotification(`Error: ${result.message}`, 'error');
         }
-        
+
     } catch (error) {
         console.error('Error fixing product images:', error);
         showNotification(`Error fixing products: ${error.message}`, 'error');

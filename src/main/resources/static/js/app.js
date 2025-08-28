@@ -146,14 +146,15 @@ function checkAuthStatus() {
     authNavElements.forEach(authNav => {
         if (user) {
             // User is logged in
+            const displayName = user.firstName || user.username || 'User';
             if (user.role === 'ADMIN') {
                 authNav.innerHTML = `
                     <a href="admin.html" class="nav-link">Dashboard</a>
-                    <a href="#" class="nav-link" onclick="logout()">Logout (${user.firstName})</a>
+                    <a href="#" class="nav-link" onclick="logout()">Logout (${displayName})</a>
                 `;
             } else {
                 authNav.innerHTML = `
-                    <a href="#" class="nav-link" onclick="logout()">Logout (${user.firstName})</a>
+                    <a href="#" class="nav-link" onclick="logout()">Logout (${displayName})</a>
                 `;
             }
         } else {

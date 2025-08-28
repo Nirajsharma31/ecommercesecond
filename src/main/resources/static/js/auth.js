@@ -47,55 +47,49 @@ async function handleLogin(e) {
     const password = document.getElementById('login-password').value;
     
     if (!email || !password) {
-        alert('Please fill in all fields');
+        showNotification('Please fill in all fields', 'error');
         return;
     }
     
     try {
-        // For demo purposes, we'll simulate login
-        // In a real app, you would call your backend API
-        
-        const loginData = {
-            username: email, // Using email as username for demo
-            password: password
-        };
-        
-        // Simulate API call
         showNotification('Logging in...');
         
-        // Mock successful login
-        setTimeout(() => {
-            const mockUser = {
-                id: 1,
-                username: email,
-                email: email,
-                firstName: 'John',
-                lastName: 'Doe',
-                role: email === 'admin@eshop.com' ? 'ADMIN' : 'USER'
-            };
-            
-            const mockToken = 'mock-jwt-token-' + Date.now();
-            
-            // Save user data
-            localStorage.setItem('user', JSON.stringify(mockUser));
-            localStorage.setItem('token', mockToken);
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: email, // Using email as username
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Save user data and token
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('token', data.token);
             
             // Sync local cart to server after login
-            syncCartAfterLogin(mockUser);
+            await syncCartAfterLogin(data.user);
             
             showNotification('Login successful!');
             
             // Redirect based on role
-            if (mockUser.role === 'ADMIN') {
+            if (data.user.role === 'ADMIN') {
                 window.location.href = 'admin.html';
             } else {
                 window.location.href = 'index.html';
             }
-        }, 1000);
+        } else {
+            showNotification(data.message || 'Login failed', 'error');
+        }
         
     } catch (error) {
         console.error('Login error:', error);
-        alert('Login failed. Please check your credentials.');
+        showNotification('Login failed. Please check your connection.', 'error');
     }
 }
 
@@ -113,35 +107,41 @@ async function handleSignup(e) {
     
     // Validation
     if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
-        alert('Please fill in all required fields');
+        showNotification('Please fill in all required fields', 'error');
         return;
     }
     
     if (password !== confirmPassword) {
-        alert('Passwords do not match');
+        showNotification('Passwords do not match', 'error');
         return;
     }
     
     if (password.length < 6) {
-        alert('Password must be at least 6 characters long');
+        showNotification('Password must be at least 6 characters long', 'error');
         return;
     }
     
     try {
-        const signupData = {
-            firstName,
-            lastName,
-            username,
-            email,
-            phoneNumber: phone,
-            password
-        };
-        
-        // Simulate API call
         showNotification('Creating account...');
         
-        // Mock successful signup
-        setTimeout(() => {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                firstName,
+                lastName,
+                username,
+                email,
+                phoneNumber: phone,
+                password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
             showNotification('Account created successfully! Please log in.');
             
             // Switch to login tab
@@ -149,11 +149,13 @@ async function handleSignup(e) {
             
             // Pre-fill login email
             document.getElementById('login-email').value = email;
-        }, 1000);
+        } else {
+            showNotification(data.message || 'Signup failed', 'error');
+        }
         
     } catch (error) {
         console.error('Signup error:', error);
-        alert('Signup failed. Please try again.');
+        showNotification('Signup failed. Please check your connection.', 'error');
     }
 }
 

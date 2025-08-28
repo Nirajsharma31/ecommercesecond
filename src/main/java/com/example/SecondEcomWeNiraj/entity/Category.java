@@ -1,6 +1,7 @@
 package com.example.SecondEcomWeNiraj.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
@@ -93,5 +94,11 @@ public class Category {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    // Custom method to get product count for JSON serialization
+    @JsonProperty("productCount")
+    public int getProductCount() {
+        return products != null ? products.size() : 0;
     }
 }
