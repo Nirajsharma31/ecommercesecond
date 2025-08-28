@@ -75,6 +75,9 @@ async function handleLogin(e) {
             // Sync local cart to server after login
             await syncCartAfterLogin(data.user);
             
+            // Process pending cart item if exists
+            await processPendingCartItem(data.user);
+            
             showNotification('Login successful!');
             
             // Redirect based on role
@@ -204,6 +207,48 @@ async function syncCartAfterLogin(user) {
         // Clear local cart after syncing
         localStorage.removeItem('cart');
         console.log('Cart synced successfully');
+    }
+}
+
+// Process pending cart item after login
+async function processPendingCartItem(user) {
+    const pendingItemStr = localStorage.getItem('pendingCartItem');
+    if (pendingItemStr) {
+        try {
+            const pendingItem = JSON.parse(pendingItemStr);
+            console.log('Processing pending cart item:', pendingItem);
+            
+            // Check if the pending item is not too old (within 30 minutes)
+            const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+            if (pendingItem.timestamp && pendingItem.timestamp > thirtyMinutesAgo) {
+                // Add the pending item to cart
+                const response = await fetch(`${API_BASE_URL}/cart/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: pendingItem.productId,
+                        quantity: pendingItem.quantity
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        showNotification(`${pendingItem.productName} added to cart!`, 'success');
+                    }
+                }
+            }
+            
+            // Clear the pending item
+            localStorage.removeItem('pendingCartItem');
+            
+        } catch (error) {
+            console.error('Error processing pending cart item:', error);
+            localStorage.removeItem('pendingCartItem'); // Clear invalid data
+        }
     }
 }
 

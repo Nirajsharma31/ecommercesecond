@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cart Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button.success {
+            background: #28a745;
+        }
+        button.danger {
+            background: #dc3545;
+        }
+        .console-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Cart Issue</h1>
+    <p>This tool helps debug why products aren't showing in cart despite success messages.</p>
+
+    <div class="debug-section">
+        <h3>Step 1: Setup Test User</h3>
+        <button onclick="createTestUser()" class="success">Create Test User</button>
+        <button onclick="checkUser()">Check Current User</button>
+        <button onclick="clearUser()" class="danger">Clear User</button>
+        <div id="user-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Step 2: Test Server Connection</h3>
+        <button onclick="testServer()">Test Server</button>
+        <button onclick="testCartEndpoint()">Test Cart Endpoint</button>
+        <div id="server-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Step 3: Debug Cart Flow</h3>
+        <button onclick="runDebugCartFlow()">Run Full Debug</button>
+        <button onclick="testAddToCart()">Test Add to Cart</button>
+        <button onclick="testGetCart()">Test Get Cart</button>
+        <button onclick="testCartCount()">Test Cart Count</button>
+        <div id="cart-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Step 4: Manual Cart Operations</h3>
+        <button onclick="manualAddToCart()">Manual Add Product</button>
+        <button onclick="viewRawCartData()">View Raw Cart Data</button>
+        <button onclick="clearServerCart()">Clear Server Cart</button>
+        <div id="manual-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Console Output</h3>
+        <button onclick="clearConsole()">Clear Console</button>
+        <div id="console-log" class="console-output">Debug tool loaded...\n</div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Enhanced logging
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        function logToConsole(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const consoleOutput = document.getElementById('console-log');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            consoleOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToConsole(args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToConsole(args.join(' '), 'error');
+        };
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function clearConsole() {
+            document.getElementById('console-log').textContent = 'Console cleared...\n';
+        }
+
+        function createTestUser() {
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            console.log('✅ Test user created:', testUser);
+            setStatus('user-status', 'Test user created and logged in', 'success');
+        }
+
+        function checkUser() {
+            const user = getCurrentUser();
+            if (user) {
+                console.log('✅ Current user:', user);
+                setStatus('user-status', `Logged in as: ${user.username}`, 'success');
+            } else {
+                console.log('❌ No user logged in');
+                setStatus('user-status', 'No user logged in', 'error');
+            }
+        }
+
+        function clearUser() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            console.log('✅ User cleared');
+            setStatus('user-status', 'User logged out', 'info');
+        }
+
+        async function testServer() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Server is running:', data);
+                    setStatus('server-status', 'Server is running', 'success');
+                } else {
+                    console.log('❌ Server error:', response.status);
+                    setStatus('server-status', 'Server error', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Server connection failed:', error);
+                setStatus('server-status', 'Server not accessible', 'error');
+            }
+        }
+
+        async function testCartEndpoint() {
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('❌ No user for cart endpoint test');
+                setStatus('server-status', 'Need user for cart test', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
+                const responseText = await response.text();
+                console.log('Cart endpoint response:', responseText);
+                
+                if (response.ok) {
+                    setStatus('server-status', 'Cart endpoint accessible', 'success');
+                } else {
+                    setStatus('server-status', 'Cart endpoint error', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Cart endpoint error:', error);
+                setStatus('server-status', 'Cart endpoint failed', 'error');
+            }
+        }
+
+        async function runDebugCartFlow() {
+            console.log('🔍 Running full debug cart flow...');
+            setStatus('cart-status', 'Running debug flow...', 'info');
+            
+            try {
+                await debugCartFlow();
+                setStatus('cart-status', 'Debug flow completed - check console', 'success');
+            } catch (error) {
+                console.error('❌ Debug flow failed:', error);
+                setStatus('cart-status', 'Debug flow failed', 'error');
+            }
+        }
+
+        async function testAddToCart() {
+            console.log('🛒 Testing add to cart...');
+            try {
+                await addToCart(1, 'Debug Product', 29.99, 1);
+                setStatus('cart-status', 'Add to cart test completed', 'success');
+            } catch (error) {
+                console.error('❌ Add to cart test failed:', error);
+                setStatus('cart-status', 'Add to cart test failed', 'error');
+            }
+        }
+
+        async function testGetCart() {
+            console.log('📦 Testing get cart...');
+            try {
+                const cart = await getCart();
+                console.log('Cart result:', cart);
+                setStatus('cart-status', `Cart has ${cart.length} items`, 'info');
+            } catch (error) {
+                console.error('❌ Get cart test failed:', error);
+                setStatus('cart-status', 'Get cart test failed', 'error');
+            }
+        }
+
+        async function testCartCount() {
+            console.log('🔢 Testing cart count...');
+            try {
+                await updateCartCount();
+                const countElement = document.querySelector('#cart-count');
+                const count = countElement ? countElement.textContent : '0';
+                console.log('Cart count updated to:', count);
+                setStatus('cart-status', `Cart count: ${count}`, 'info');
+            } catch (error) {
+                console.error('❌ Cart count test failed:', error);
+                setStatus('cart-status', 'Cart count test failed', 'error');
+            }
+        }
+
+        async function manualAddToCart() {
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('❌ No user for manual add');
+                setStatus('manual-status', 'Need user for manual add', 'error');
+                return;
+            }
+
+            console.log('🔧 Manual add to cart...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/add`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        productId: 1,
+                        quantity: 1
+                    })
+                });
+
+                const responseText = await response.text();
+                console.log('Manual add response:', responseText);
+                
+                if (response.ok) {
+                    setStatus('manual-status', 'Manual add successful', 'success');
+                } else {
+                    setStatus('manual-status', 'Manual add failed', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Manual add failed:', error);
+                setStatus('manual-status', 'Manual add error', 'error');
+            }
+        }
+
+        async function viewRawCartData() {
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('❌ No user for raw cart data');
+                setStatus('manual-status', 'Need user for cart data', 'error');
+                return;
+            }
+
+            console.log('📋 Getting raw cart data...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
+                const responseText = await response.text();
+                console.log('Raw cart data:', responseText);
+                
+                try {
+                    const parsed = JSON.parse(responseText);
+                    console.log('Parsed cart data:', parsed);
+                    setStatus('manual-status', 'Raw cart data retrieved - check console', 'success');
+                } catch (parseError) {
+                    console.error('❌ Failed to parse cart data:', parseError);
+                    setStatus('manual-status', 'Cart data parse error', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Failed to get raw cart data:', error);
+                setStatus('manual-status', 'Failed to get cart data', 'error');
+            }
+        }
+
+        async function clearServerCart() {
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('❌ No user for clear cart');
+                setStatus('manual-status', 'Need user for clear cart', 'error');
+                return;
+            }
+
+            console.log('🗑️ Clearing server cart...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/cart/clear/${user.id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    console.log('✅ Server cart cleared');
+                    setStatus('manual-status', 'Server cart cleared', 'success');
+                } else {
+                    console.log('❌ Failed to clear server cart');
+                    setStatus('manual-status', 'Failed to clear cart', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Clear cart error:', error);
+                setStatus('manual-status', 'Clear cart error', 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🐛 Debug tool loaded');
+            console.log('API Base URL:', API_BASE_URL);
+            checkUser();
+        });
+    </script>
+</body>
+</html>

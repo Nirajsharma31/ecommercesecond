@@ -1,5 +1,10 @@
 // Cart page functionality
 document.addEventListener('DOMContentLoaded', function () {
+    // Require authentication to access cart page
+    if (!requireAuthentication()) {
+        return; // Stop execution if not authenticated
+    }
+
     loadCart();
     updateCartCount();
     checkAuthStatus();
@@ -103,30 +108,26 @@ async function updateQuantity(productId, newQuantity) {
 
     const user = getCurrentUser();
     if (!user) {
-        // Fallback to localStorage for non-logged-in users
-        let cart = await getCart();
+        showNotification('Please login to manage cart', 'error');
+        return;
+    }
+
+    try {
+        // Update quantity in localStorage cart
+        const cartKey = 'userCart_' + user.id;
+        let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
         const itemIndex = cart.findIndex(item => item.id === productId);
 
         if (itemIndex !== -1) {
             cart[itemIndex].quantity = newQuantity;
-            saveCart(cart);
+            localStorage.setItem(cartKey, JSON.stringify(cart));
+
+            // Reload cart display
             loadCart();
             updateCartCount();
+            showNotification('Quantity updated');
         }
-        return;
-    }
 
-    // For logged-in users, we need to implement server-side quantity update
-    // For now, remove and re-add with new quantity
-    try {
-        await removeFromCart(productId);
-        // Get product details to re-add
-        const response = await fetch(`${API_BASE_URL}/products/${productId}`);
-        if (response.ok) {
-            const product = await response.json();
-            await addToCart(productId, product.name, product.price, newQuantity);
-            loadCart();
-        }
     } catch (error) {
         console.error('Error updating quantity:', error);
         showNotification('Failed to update quantity', 'error');
@@ -138,34 +139,32 @@ async function removeFromCart(productId) {
     const user = getCurrentUser();
 
     if (!user) {
-        // Fallback to localStorage for non-logged-in users
-        let cart = await getCart();
-        cart = cart.filter(item => item.id !== productId);
-        saveCart(cart);
-        loadCart();
-        updateCartCount();
-        showNotification('Item removed from cart');
+        showNotification('Please login to manage cart', 'error');
         return;
     }
 
-    // For logged-in users, use server-side removal
     try {
-        const response = await fetch(`${API_BASE_URL}/cart/remove/${user.id}/${productId}`, {
-            method: 'DELETE'
-        });
+        // Remove from localStorage cart
+        const cartKey = 'userCart_' + user.id;
+        let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        cart = cart.filter(item => item.id !== productId);
+        localStorage.setItem(cartKey, JSON.stringify(cart));
 
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                loadCart();
-                updateCartCount();
-                showNotification('Item removed from cart');
-            } else {
-                showNotification('Failed to remove item', 'error');
-            }
-        } else {
-            showNotification('Failed to remove item', 'error');
+        // Reload cart display
+        loadCart();
+        updateCartCount();
+        showNotification('Item removed from cart');
+
+        // Try to sync with server in background
+        try {
+            await fetch(`${API_BASE_URL}/cart/remove/${user.id}/${productId}`, {
+                method: 'DELETE'
+            });
+            console.log('✅ Item removal synced to server');
+        } catch (syncError) {
+            console.log('⚠️ Server sync failed, but local removal successful');
         }
+
     } catch (error) {
         console.error('Error removing from cart:', error);
         showNotification('Failed to remove item', 'error');

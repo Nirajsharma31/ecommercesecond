@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Working Cart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .product-test {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-display {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .cart-count {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🛒 Test Working Cart</h1>
+        
+        <div class="test-section">
+            <h3>Authentication</h3>
+            <button onclick="loginTestUser()" class="success">Login as Test User</button>
+            <button onclick="logoutUser()" class="danger">Logout</button>
+            <div id="auth-display"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Cart Status</h3>
+            <div>Cart Count: <span id="cart-count">0</span></div>
+            <button onclick="refreshCartDisplay()">Refresh Cart Display</button>
+            <button onclick="clearTestCart()" class="danger">Clear Cart</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Products</h3>
+            
+            <div class="product-test">
+                <div>
+                    <strong>Gaming Laptop</strong><br>
+                    Price: $1299.99
+                </div>
+                <button onclick="testAddToCart(1, 'Gaming Laptop', 1299.99)">Add to Cart</button>
+            </div>
+            
+            <div class="product-test">
+                <div>
+                    <strong>Wireless Mouse</strong><br>
+                    Price: $49.99
+                </div>
+                <button onclick="testAddToCart(2, 'Wireless Mouse', 49.99)">Add to Cart</button>
+            </div>
+            
+            <div class="product-test">
+                <div>
+                    <strong>Mechanical Keyboard</strong><br>
+                    Price: $129.99
+                </div>
+                <button onclick="testAddToCart(3, 'Mechanical Keyboard', 129.99)">Add to Cart</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Current Cart Contents</h3>
+            <div id="cart-contents" class="cart-display">
+                Cart is empty
+            </div>
+            <div>
+                <button onclick="viewCart()">View Full Cart Page</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        function loginTestUser() {
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            updateAuthDisplay();
+            showNotification('Logged in successfully!');
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            
+            // Clear user-specific cart
+            const user = getCurrentUser();
+            if (user) {
+                localStorage.removeItem('userCart_' + user.id);
+            }
+            
+            updateAuthDisplay();
+            refreshCartDisplay();
+            showNotification('Logged out successfully!');
+        }
+
+        function updateAuthDisplay() {
+            const user = getCurrentUser();
+            const authDisplay = document.getElementById('auth-display');
+            
+            if (user) {
+                authDisplay.innerHTML = `<p style="color: green;">✅ Logged in as: ${user.firstName} ${user.lastName}</p>`;
+            } else {
+                authDisplay.innerHTML = '<p style="color: red;">❌ Not logged in</p>';
+            }
+        }
+
+        async function testAddToCart(productId, productName, productPrice) {
+            console.log('Testing add to cart:', { productId, productName, productPrice });
+            
+            try {
+                await addToCart(productId, productName, productPrice, 1);
+                refreshCartDisplay();
+            } catch (error) {
+                console.error('Add to cart test failed:', error);
+                showNotification('Add to cart failed: ' + error.message, 'error');
+            }
+        }
+
+        async function refreshCartDisplay() {
+            try {
+                const cart = await getCart();
+                const cartContents = document.getElementById('cart-contents');
+                const cartCount = document.getElementById('cart-count');
+                
+                if (cart.length === 0) {
+                    cartContents.innerHTML = 'Cart is empty';
+                    cartCount.textContent = '0';
+                    cartCount.style.display = 'none';
+                } else {
+                    let html = '<ul>';
+                    let totalItems = 0;
+                    let totalPrice = 0;
+                    
+                    cart.forEach(item => {
+                        totalItems += item.quantity;
+                        totalPrice += item.price * item.quantity;
+                        html += `<li>${item.name} - $${item.price} x ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}</li>`;
+                    });
+                    
+                    html += `</ul><p><strong>Total Items: ${totalItems}</strong></p>`;
+                    html += `<p><strong>Total Price: $${totalPrice.toFixed(2)}</strong></p>`;
+                    
+                    cartContents.innerHTML = html;
+                    cartCount.textContent = totalItems;
+                    cartCount.style.display = totalItems > 0 ? 'inline' : 'none';
+                }
+                
+                // Also update the main cart count
+                await updateCartCount();
+                
+            } catch (error) {
+                console.error('Error refreshing cart display:', error);
+                document.getElementById('cart-contents').innerHTML = 'Error loading cart';
+            }
+        }
+
+        function clearTestCart() {
+            const user = getCurrentUser();
+            if (user) {
+                localStorage.removeItem('userCart_' + user.id);
+                refreshCartDisplay();
+                showNotification('Cart cleared!');
+            } else {
+                showNotification('Please login first', 'error');
+            }
+        }
+
+        function viewCart() {
+            window.location.href = 'cart.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthDisplay();
+            refreshCartDisplay();
+        });
+    </script>
+</body>
+</html>

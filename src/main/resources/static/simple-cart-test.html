@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cart Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-display {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .error {
+            background: #dc3545;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Simple Cart Test</h1>
+    
+    <div>
+        <h3>Authentication</h3>
+        <button onclick="createTestUser()" class="success">Login as Test User</button>
+        <button onclick="logout()" class="error">Logout</button>
+        <div id="auth-status"></div>
+    </div>
+
+    <div>
+        <h3>Test Products</h3>
+        
+        <div class="product">
+            <div>
+                <h4>Laptop</h4>
+                <p>Price: $999.99</p>
+            </div>
+            <button onclick="simpleAddToCart(1, 'Laptop', 999.99)">Add to Cart</button>
+        </div>
+        
+        <div class="product">
+            <div>
+                <h4>Phone</h4>
+                <p>Price: $599.99</p>
+            </div>
+            <button onclick="simpleAddToCart(2, 'Phone', 599.99)">Add to Cart</button>
+        </div>
+        
+        <div class="product">
+            <div>
+                <h4>Headphones</h4>
+                <p>Price: $199.99</p>
+            </div>
+            <button onclick="simpleAddToCart(3, 'Headphones', 199.99)">Add to Cart</button>
+        </div>
+    </div>
+
+    <div class="cart-display">
+        <h3>Cart Contents</h3>
+        <div id="cart-contents">Cart is empty</div>
+        <div id="cart-total">Total: $0.00</div>
+        <button onclick="displayCart()">Refresh Cart</button>
+        <button onclick="clearCart()" class="error">Clear Cart</button>
+    </div>
+
+    <script>
+        // Simple cart implementation
+        let cart = [];
+
+        function showNotification(message, type = 'success') {
+            // Remove existing notification
+            const existing = document.querySelector('.notification');
+            if (existing) existing.remove();
+
+            // Create new notification
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        function createTestUser() {
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'Test',
+                lastName: 'User',
+                email: 'test@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            document.getElementById('auth-status').innerHTML = 
+                `<p style="color: green;">✅ Logged in as: ${testUser.firstName} ${testUser.lastName}</p>`;
+            
+            showNotification('Logged in successfully!');
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            cart = [];
+            
+            document.getElementById('auth-status').innerHTML = 
+                '<p style="color: red;">❌ Not logged in</p>';
+            
+            displayCart();
+            showNotification('Logged out successfully!');
+        }
+
+        function getCurrentUser() {
+            const userStr = localStorage.getItem('user');
+            return userStr ? JSON.parse(userStr) : null;
+        }
+
+        function simpleAddToCart(productId, productName, productPrice) {
+            console.log('Adding to cart:', { productId, productName, productPrice });
+            
+            const user = getCurrentUser();
+            if (!user) {
+                showNotification('Please login first!', 'error');
+                return;
+            }
+
+            // Check if item already exists
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+                showNotification(`${productName} quantity updated!`);
+            } else {
+                cart.push({
+                    id: productId,
+                    name: productName,
+                    price: productPrice,
+                    quantity: 1
+                });
+                showNotification(`${productName} added to cart!`);
+            }
+
+            displayCart();
+            console.log('Current cart:', cart);
+        }
+
+        function displayCart() {
+            const cartContents = document.getElementById('cart-contents');
+            const cartTotal = document.getElementById('cart-total');
+
+            if (cart.length === 0) {
+                cartContents.innerHTML = 'Cart is empty';
+                cartTotal.innerHTML = 'Total: $0.00';
+                return;
+            }
+
+            let html = '<ul>';
+            let total = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `<li>${item.name} - $${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}</li>`;
+            });
+
+            html += '</ul>';
+            cartContents.innerHTML = html;
+            cartTotal.innerHTML = `Total: $${total.toFixed(2)}`;
+        }
+
+        function clearCart() {
+            cart = [];
+            displayCart();
+            showNotification('Cart cleared!');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser();
+            if (user) {
+                document.getElementById('auth-status').innerHTML = 
+                    `<p style="color: green;">✅ Logged in as: ${user.firstName} ${user.lastName}</p>`;
+            } else {
+                document.getElementById('auth-status').innerHTML = 
+                    '<p style="color: red;">❌ Not logged in</p>';
+            }
+            displayCart();
+        });
+    </script>
+</body>
+</html>

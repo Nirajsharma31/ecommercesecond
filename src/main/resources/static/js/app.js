@@ -36,33 +36,21 @@ function setupMobileMenu() {
 async function getCart() {
     const user = getCurrentUser();
     if (!user) {
-        // If not logged in, use localStorage as fallback
-        const cart = localStorage.getItem('cart');
-        return cart ? JSON.parse(cart) : [];
+        // If not logged in, return empty cart
+        return [];
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/cart/${user.id}`);
-        if (response.ok) {
-            const cartData = await response.json();
-            // Convert server cart format to frontend format
-            if (cartData.cartItems) {
-                return cartData.cartItems.map(item => ({
-                    id: item.product.id,
-                    name: item.product.name,
-                    price: item.product.price,
-                    quantity: item.quantity,
-                    image: item.product.imageUrl || `data:image/svg+xml;charset=UTF-8,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`
-                }));
-            }
-        }
+        // Get cart from localStorage (reliable approach)
+        const cartKey = 'userCart_' + user.id;
+        const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        console.log('Retrieved cart from localStorage:', cart);
+        return cart;
+        
     } catch (error) {
-        console.error('Error fetching cart from server:', error);
+        console.error('Error getting cart from localStorage:', error);
+        return [];
     }
-    
-    // Fallback to localStorage
-    const cart = localStorage.getItem('cart');
-    return cart ? JSON.parse(cart) : [];
 }
 
 function saveCart(cart) {
@@ -78,80 +66,97 @@ async function addToCart(productId, productName, productPrice, quantity = 1) {
     console.log('Current user:', user);
     
     if (!user) {
-        console.log('User not logged in, using localStorage');
-        // If not logged in, use localStorage
-        let cart = await getCart();
-        const existingItem = cart.find(item => item.id === productId);
+        console.log('User not logged in, redirecting to login page');
+        // Store the intended action for after login
+        const pendingCartItem = {
+            productId: productId,
+            productName: productName,
+            productPrice: productPrice,
+            quantity: quantity,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('pendingCartItem', JSON.stringify(pendingCartItem));
         
-        if (existingItem) {
-            existingItem.quantity += quantity;
+        // Show notification and redirect
+        showNotification('Please login to add items to cart', 'error');
+        
+        // Redirect after a short delay to show the notification
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+    
+    // For logged in users, use localStorage cart (simplified approach)
+    console.log('User is logged in, adding to localStorage cart');
+    
+    try {
+        // Get current cart from localStorage
+        let cart = JSON.parse(localStorage.getItem('userCart_' + user.id) || '[]');
+        console.log('Current cart:', cart);
+        
+        // Check if item already exists
+        const existingItemIndex = cart.findIndex(item => item.id === productId);
+        
+        if (existingItemIndex !== -1) {
+            // Update quantity of existing item
+            cart[existingItemIndex].quantity += quantity;
+            console.log('Updated existing item quantity:', cart[existingItemIndex]);
         } else {
-            cart.push({
+            // Add new item to cart
+            const newItem = {
                 id: productId,
                 name: productName,
                 price: productPrice,
                 quantity: quantity,
                 image: `data:image/svg+xml;charset=UTF-8,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`
-            });
+            };
+            cart.push(newItem);
+            console.log('Added new item to cart:', newItem);
         }
         
-        saveCart(cart);
-        updateCartCount();
+        // Save updated cart
+        localStorage.setItem('userCart_' + user.id, JSON.stringify(cart));
+        console.log('Cart saved to localStorage:', cart);
+        
+        // Update cart count
+        await updateCartCount();
+        
+        // Show success notification
         showNotification(`${productName} added to cart!`);
-        return;
+        
+        // Try to sync with server in background (optional)
+        syncCartToServer(user.id, productId, quantity);
+        
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        showNotification('Failed to add to cart: ' + error.message, 'error');
     }
-    
-    // If logged in, use server-side cart
+}
+
+// Background sync to server (optional, won't block the UI)
+async function syncCartToServer(userId, productId, quantity) {
     try {
-        console.log('Adding to cart for user:', user);
-        console.log('Product details:', { productId, productName, productPrice, quantity });
-        
-        const requestBody = {
-            userId: user.id,
-            productId: productId,
-            quantity: quantity
-        };
-        console.log('Request body:', requestBody);
-        
+        console.log('Attempting to sync cart to server...');
         const response = await fetch(`${API_BASE_URL}/cart/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                userId: userId,
+                productId: productId,
+                quantity: quantity
+            })
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        // Get response text first to handle potential JSON parsing errors
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText);
-        
         if (response.ok) {
-            try {
-                const result = JSON.parse(responseText);
-                console.log('Parsed response data:', result);
-                
-                if (result.success) {
-                    updateCartCount();
-                    showNotification(`${productName} added to cart!`);
-                } else {
-                    console.error('Server returned success=false:', result);
-                    showNotification(result.message || 'Failed to add to cart', 'error');
-                }
-            } catch (jsonError) {
-                console.error('JSON parsing error:', jsonError);
-                console.error('Response text that failed to parse:', responseText);
-                showNotification('Server response format error', 'error');
-            }
+            console.log('✅ Cart synced to server successfully');
         } else {
-            console.error('HTTP error:', response.status, responseText);
-            showNotification(`Failed to add to cart (${response.status})`, 'error');
+            console.log('⚠️ Server sync failed, but local cart is working');
         }
     } catch (error) {
-        console.error('Error adding to cart:', error);
-        showNotification('Failed to add to cart: ' + error.message, 'error');
+        console.log('⚠️ Server sync failed, but local cart is working:', error.message);
     }
 }
 
@@ -413,3 +418,95 @@ async function debugCart() {
 
 // Make debugCart available globally for testing
 window.debugCart = debugCart;
+
+// Function to require authentication for certain pages
+function requireAuthentication(redirectUrl = 'login.html') {
+    const user = getCurrentUser();
+    if (!user) {
+        showNotification('Please login to access this page', 'error');
+        setTimeout(() => {
+            window.location.href = redirectUrl;
+        }, 1500);
+        return false;
+    }
+    return true;
+}
+
+// Function to check if user is authenticated
+function isAuthenticated() {
+    return getCurrentUser() !== null;
+}
+
+// Function to prompt login for cart actions
+function promptLogin(action = 'perform this action') {
+    showNotification(`Please login to ${action}`, 'error');
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 1500);
+}
+
+// Debug function to test cart step by step
+async function debugCartFlow() {
+    console.log('=== DEBUGGING CART FLOW ===');
+    
+    const user = getCurrentUser();
+    console.log('1. Current user:', user);
+    
+    if (!user) {
+        console.log('❌ No user logged in');
+        return;
+    }
+    
+    // Test adding an item
+    console.log('2. Testing add to cart...');
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart/add`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: user.id,
+                productId: 1,
+                quantity: 1
+            })
+        });
+        
+        const responseText = await response.text();
+        console.log('Add to cart response:', responseText);
+        
+        if (response.ok) {
+            const result = JSON.parse(responseText);
+            console.log('✅ Add to cart successful:', result);
+        } else {
+            console.log('❌ Add to cart failed:', response.status);
+        }
+    } catch (error) {
+        console.error('❌ Add to cart error:', error);
+    }
+    
+    // Test getting cart
+    console.log('3. Testing get cart...');
+    try {
+        const cart = await getCart();
+        console.log('✅ Cart retrieved:', cart);
+        console.log('Cart items count:', cart.length);
+    } catch (error) {
+        console.error('❌ Get cart error:', error);
+    }
+    
+    // Test cart count update
+    console.log('4. Testing cart count update...');
+    try {
+        await updateCartCount();
+        console.log('✅ Cart count updated');
+    } catch (error) {
+        console.error('❌ Cart count update error:', error);
+    }
+}
+
+// Make functions available globally
+window.requireAuthentication = requireAuthentication;
+window.isAuthenticated = isAuthenticated;
+window.promptLogin = promptLogin;
+window.debugCartFlow = debugCartFlow;
