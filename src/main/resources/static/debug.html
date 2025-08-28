@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug - E-Shop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .debug-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 E-Shop API Debug Tool</h1>
+
+    <div class="debug-container">
+        <h2>Server Status</h2>
+        <button class="test-button" onclick="testHealth()">Test Health Endpoint</button>
+        <button class="test-button" onclick="testServerConnection()">Test Server Connection</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="debug-container">
+        <h2>Product API Tests</h2>
+        <button class="test-button" onclick="testProductsEndpoint()">Test Products Endpoint</button>
+        <button class="test-button" onclick="testProductCount()">Test Product Count</button>
+        <button class="test-button" onclick="testProductTest()">Test Product Test Endpoint</button>
+        <div id="products-result" class="result"></div>
+    </div>
+
+    <div class="debug-container">
+        <h2>Category API Tests</h2>
+        <button class="test-button" onclick="testCategoriesEndpoint()">Test Categories Endpoint</button>
+        <div id="categories-result" class="result"></div>
+    </div>
+
+    <div class="debug-container">
+        <h2>Database Management</h2>
+        <button class="test-button" onclick="checkDatabaseStatus()">Check Database Status</button>
+        <button class="test-button" onclick="getProductsCount()">Get Products Count</button>
+        <button class="test-button" onclick="createSampleProducts()" style="background: #28a745;">Create Sample
+            Products</button>
+        <button class="test-button" onclick="deleteAllProducts()" style="background: #dc3545;">🗑️ Delete All
+            Products</button>
+        <div id="database-result" class="result"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.textContent = 'Testing health endpoint...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Health Check Successful!\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Health Check Failed!\nError: ${error.message}\nThis usually means the server is not running.`;
+            }
+        }
+
+        async function testServerConnection() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.textContent = 'Testing server connection...';
+
+            try {
+                const response = await fetch('http://localhost:8080');
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Server is reachable!\nStatus: ${response.status}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Cannot connect to server!\nError: ${error.message}\n\nTo fix this:\n1. Make sure MySQL is running\n2. Start the Spring Boot app with: mvnw spring-boot:run\n3. Wait for the app to fully start (look for "Started SecondEcomWeNirajApplication")`;
+            }
+        }
+
+        async function testProductsEndpoint() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.textContent = 'Testing products endpoint...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/products`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const products = await response.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Products Endpoint Working!\nStatus: ${response.status}\nProducts found: ${products.length}\nFirst few products:\n${JSON.stringify(products.slice(0, 3), null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Products Endpoint Failed!\nError: ${error.message}`;
+            }
+        }
+
+        async function testProductCount() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.textContent = 'Testing product count...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/count`);
+                const count = await response.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Product Count: ${count}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Product Count Failed!\nError: ${error.message}`;
+            }
+        }
+
+        async function testProductTest() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.textContent = 'Testing product test endpoint...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/test`);
+                const message = await response.text();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Product Test Endpoint: ${message}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Product Test Failed!\nError: ${error.message}`;
+            }
+        }
+
+        async function testCategoriesEndpoint() {
+            const resultDiv = document.getElementById('categories-result');
+            resultDiv.textContent = 'Testing categories endpoint...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/categories`);
+                const categories = await response.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Categories Endpoint Working!\nStatus: ${response.status}\nCategories found: ${categories.length}\nCategories:\n${JSON.stringify(categories, null, 2)}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Categories Endpoint Failed!\nError: ${error.message}`;
+            }
+        }
+
+        async function checkDatabaseStatus() {
+            const resultDiv = document.getElementById('database-result');
+            resultDiv.textContent = 'Checking database status...';
+
+            try {
+                // Test both products and categories to see if database is working
+                const [productsResponse, categoriesResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/products/count`),
+                    fetch(`${API_BASE_URL}/categories`)
+                ]);
+
+                const productCount = await productsResponse.json();
+                const categories = await categoriesResponse.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✅ Database appears to be working!\nProduct count: ${productCount}\nCategory count: ${categories.length}\n\nIf counts are 0, the DataInitializer might not have run properly.`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Database connection issues!\nError: ${error.message}\n\nPossible fixes:\n1. Make sure MySQL is running\n2. Check database credentials in application.properties\n3. Verify database 'secondecomwebsite' exists`;
+            }
+        }
+
+        async function getProductsCount() {
+            const resultDiv = document.getElementById('database-result');
+            resultDiv.textContent = 'Getting products count...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/products-count`);
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let message = `📊 Products Count Summary\n\nTotal Products: ${data.totalProducts}\nTotal Categories: ${data.totalCategories}\n\nBreakdown by Category:\n`;
+
+                    Object.keys(data.categoryCount).forEach(category => {
+                        message += `${category}: ${data.categoryCount[category]} products\n`;
+                    });
+
+                    resultDiv.textContent = message;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Failed to get count: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Error getting count: ${error.message}`;
+            }
+        }
+
+        async function createSampleProducts() {
+            const resultDiv = document.getElementById('database-result');
+            resultDiv.textContent = 'Creating sample products... This may take a few minutes.';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/create-sample-products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let message = `✅ Sample Products Created Successfully!\n\nTotal Created: ${data.totalCreated}\n\nBreakdown:\n`;
+
+                    Object.keys(data).forEach(key => {
+                        if (key !== 'success' && key !== 'message' && key !== 'totalCreated') {
+                            message += `${key}: ${data[key]}\n`;
+                        }
+                    });
+
+                    message += '\nYou can now refresh the main site to see the products!';
+                    resultDiv.textContent = message;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Failed to create products: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Error creating products: ${error.message}`;
+            }
+        }
+
+        async function deleteAllProducts() {
+            // Confirmation dialog
+            if (!confirm('⚠️ WARNING: This will permanently delete ALL products from your database!\n\nAre you sure you want to continue?')) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('database-result');
+            resultDiv.textContent = 'Deleting all products... Please wait.';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/delete-all-products`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let message = `✅ Products Deleted Successfully!\n\nTotal Deleted: ${data.deletedCount}\n`;
+
+                    if (data.categoryBreakdown) {
+                        message += '\nDeleted by Category:\n';
+                        Object.keys(data.categoryBreakdown).forEach(category => {
+                            message += `${category}: ${data.categoryBreakdown[category]} products\n`;
+                        });
+                    }
+
+                    message += '\nAll products have been removed from the database.';
+                    resultDiv.textContent = message;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Failed to delete products: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Error deleting products: ${error.message}`;
+            }
+        }
+
+        // Auto-run basic tests on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                testHealth();
+                testProductsEndpoint();
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>
