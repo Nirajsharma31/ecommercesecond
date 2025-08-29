@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Admin Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .orders-table th, .orders-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .orders-table th {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Admin Orders Issue</h1>
+    
+    <div class="section">
+        <h3>Test Data Setup</h3>
+        <button onclick="createTestOrders()" class="success">Create Test Orders</button>
+        <button onclick="clearOrders()" class="danger">Clear All Orders</button>
+        <button onclick="checkOrders()">Check Orders in Storage</button>
+        <div id="setup-status"></div>
+    </div>
+
+    <div class="section">
+        <h3>Orders Display Test</h3>
+        <button onclick="loadOrdersTest()">Load Orders (Test Function)</button>
+        <button onclick="openAdminPage()">Open Admin Page</button>
+        <div id="orders-display">
+            <table class="orders-table" id="test-orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="test-orders-body">
+                    <tr><td colspan="6">Click "Load Orders" to test</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Debug Information</h3>
+        <button onclick="debugOrdersIssue()">Debug Orders Issue</button>
+        <div id="debug-info"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff';
+            element.innerHTML = `<div style="padding: 10px; background: ${color}20; border: 1px solid ${color}; border-radius: 4px; margin: 10px 0; color: ${color};">${message}</div>`;
+        }
+
+        function createTestOrders() {
+            const testOrders = [
+                {
+                    id: Date.now(),
+                    userId: 1,
+                    customerName: 'John Doe',
+                    items: [
+                        { id: 1, name: 'Gaming Laptop', price: 1299.99, quantity: 1 }
+                    ],
+                    shippingInfo: {
+                        fullName: 'John Doe',
+                        address: '123 Main St',
+                        city: 'New York',
+                        zipCode: '10001'
+                    },
+                    paymentMethod: 'Credit Card',
+                    total: 1399.98,
+                    status: 'CONFIRMED',
+                    date: '2024-01-15',
+                    timestamp: Date.now()
+                },
+                {
+                    id: Date.now() + 1,
+                    userId: 2,
+                    customerName: 'Jane Smith',
+                    items: [
+                        { id: 2, name: 'Wireless Mouse', price: 49.99, quantity: 2 }
+                    ],
+                    shippingInfo: {
+                        fullName: 'Jane Smith',
+                        address: '456 Oak Ave',
+                        city: 'Los Angeles',
+                        zipCode: '90210'
+                    },
+                    paymentMethod: 'PayPal',
+                    total: 105.97,
+                    status: 'SHIPPED',
+                    date: '2024-01-14',
+                    timestamp: Date.now() + 1
+                }
+            ];
+
+            localStorage.setItem('orders', JSON.stringify(testOrders));
+            setStatus('setup-status', `✅ Created ${testOrders.length} test orders`, 'success');
+        }
+
+        function clearOrders() {
+            localStorage.removeItem('orders');
+            setStatus('setup-status', '✅ All orders cleared', 'success');
+        }
+
+        function checkOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            setStatus('setup-status', `Found ${orders.length} orders in localStorage`, 'info');
+            console.log('Orders in storage:', orders);
+        }
+
+        function loadOrdersTest() {
+            console.log('Testing loadOrders function...');
+            const tbody = document.getElementById('test-orders-body');
+            
+            try {
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                console.log('Found orders:', orders);
+                
+                if (orders.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No orders found - create test orders first
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Sort orders by timestamp (newest first)
+                orders.sort((a, b) => b.timestamp - a.timestamp);
+                
+                tbody.innerHTML = orders.map(order => `
+                    <tr>
+                        <td>#${order.id}</td>
+                        <td>${order.customerName}</td>
+                        <td>$${order.total.toFixed(2)}</td>
+                        <td>${order.status}</td>
+                        <td>${order.date}</td>
+                        <td>
+                            <button onclick="viewOrderDetails(${order.id})">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                setStatus('setup-status', `✅ Loaded ${orders.length} orders successfully`, 'success');
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px; color: #e74c3c;">
+                            Error loading orders: ${error.message}
+                        </td>
+                    </tr>
+                `;
+                setStatus('setup-status', `❌ Error loading orders: ${error.message}`, 'error');
+            }
+        }
+
+        function viewOrderDetails(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const order = orders.find(o => o.id == orderId);
+            
+            if (order) {
+                let details = `Order #${order.id}\n\n`;
+                details += `Customer: ${order.customerName}\n`;
+                details += `Date: ${order.date}\n`;
+                details += `Status: ${order.status}\n`;
+                details += `Total: $${order.total.toFixed(2)}\n\n`;
+                details += `Items:\n`;
+                order.items.forEach(item => {
+                    details += `- ${item.name} x${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+                });
+                
+                alert(details);
+            }
+        }
+
+        function openAdminPage() {
+            window.open('admin.html', '_blank');
+        }
+
+        function debugOrdersIssue() {
+            let debugInfo = '<h4>Debug Information:</h4>';
+            
+            // Check localStorage
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            debugInfo += `<p><strong>Orders in localStorage:</strong> ${orders.length}</p>`;
+            
+            if (orders.length > 0) {
+                debugInfo += '<p><strong>Sample order:</strong></p>';
+                debugInfo += `<pre>${JSON.stringify(orders[0], null, 2)}</pre>`;
+            }
+            
+            // Check if admin.js loadOrders function exists
+            debugInfo += '<p><strong>Checking admin functions...</strong></p>';
+            
+            // Try to call the admin loadOrders function if it exists
+            if (typeof loadOrders === 'function') {
+                debugInfo += '<p>✅ loadOrders function exists</p>';
+            } else {
+                debugInfo += '<p>❌ loadOrders function not found</p>';
+            }
+            
+            document.getElementById('debug-info').innerHTML = debugInfo;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkOrders();
+        });
+    </script>
+</body>
+</html>

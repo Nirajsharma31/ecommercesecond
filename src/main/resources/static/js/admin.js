@@ -84,7 +84,25 @@ function switchTab(tab) {
 // Update statistics
 async function updateStats() {
     try {
-        // Fetch real product count from API
+        // Use the comprehensive stats endpoint
+        const statsResponse = await fetch(`${API_BASE_URL}/admin/stats`);
+        if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            if (statsData.success) {
+                document.getElementById('total-products').textContent = statsData.totalProducts || '0';
+                document.getElementById('total-categories').textContent = statsData.totalCategories || '0';
+                document.getElementById('total-users').textContent = statsData.totalUsers || '0';
+                
+                // Get real order count from localStorage
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                document.getElementById('total-orders').textContent = orders.length;
+                
+                console.log('Admin stats loaded:', statsData);
+                return;
+            }
+        }
+        
+        // Fallback: try individual endpoints
         const response = await fetch(`${API_BASE_URL}/admin/products-count`);
         if (response.ok) {
             const data = await response.json();
@@ -103,13 +121,30 @@ async function updateStats() {
             document.getElementById('total-categories').textContent = categories.length || '0';
         }
 
+        // Try to get user count from API
+        try {
+            const usersResponse = await fetch(`${API_BASE_URL}/admin/users-count`);
+            if (usersResponse.ok) {
+                const usersData = await usersResponse.json();
+                if (usersData.success) {
+                    document.getElementById('total-users').textContent = usersData.totalUsers || '0';
+                } else {
+                    // Fallback to localStorage check
+                    const users = JSON.parse(localStorage.getItem('user') || 'null');
+                    document.getElementById('total-users').textContent = users ? '1' : '0';
+                }
+            }
+        } catch (userError) {
+            console.error('Error fetching user count:', userError);
+            // Fallback to localStorage check
+            const users = JSON.parse(localStorage.getItem('user') || 'null');
+            document.getElementById('total-users').textContent = users ? '1' : '0';
+        }
+
         // Get real order count from localStorage
         const orders = JSON.parse(localStorage.getItem('orders') || '[]');
         document.getElementById('total-orders').textContent = orders.length;
         
-        // Get user count (for now just show 1 if there's a logged in user)
-        const users = JSON.parse(localStorage.getItem('user') || 'null');
-        document.getElementById('total-users').textContent = users ? '1' : '0';
     } catch (error) {
         console.error('Error updating stats:', error);
         // Fallback values

@@ -26,14 +26,16 @@ public class AdminController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final com.example.SecondEcomWeNiraj.service.UserService userService;
     
     // Directory to store uploaded images
     private final String UPLOAD_DIR = "src/main/resources/static/images/products/";
 
     @Autowired
-    public AdminController(ProductService productService, CategoryService categoryService) {
+    public AdminController(ProductService productService, CategoryService categoryService, com.example.SecondEcomWeNiraj.service.UserService userService) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.userService = userService;
         
         // Create upload directory if it doesn't exist
         try {
@@ -342,5 +344,70 @@ public class AdminController {
         
         return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/users-count")
+    public ResponseEntity<Map<String, Object>> getUsersCount() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            var allUsers = userService.getAllUsers();
+            
+            // Count users by role
+            long adminCount = allUsers.stream()
+                .filter(user -> "ADMIN".equals(user.getRole().toString()))
+                .count();
+            long userCount = allUsers.stream()
+                .filter(user -> "USER".equals(user.getRole().toString()))
+                .count();
+            
+            response.put("success", true);
+            response.put("totalUsers", allUsers.size());
+            response.put("adminCount", adminCount);
+            response.put("userCount", userCount);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error getting user count: " + e.getMessage());
+            response.put("totalUsers", 0);
+        }
+        
+        return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getAdminStats() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Get product stats
+            var allProducts = productService.getAllProducts();
+            var categories = categoryService.getAllCategories();
+            
+            // Get user stats
+            var allUsers = userService.getAllUsers();
+            long adminCount = allUsers.stream()
+                .filter(user -> "ADMIN".equals(user.getRole().toString()))
+                .count();
+            long userCount = allUsers.stream()
+                .filter(user -> "USER".equals(user.getRole().toString()))
+                .count();
+            
+            response.put("success", true);
+            response.put("totalProducts", allProducts.size());
+            response.put("totalCategories", categories.size());
+            response.put("totalUsers", allUsers.size());
+            response.put("adminCount", adminCount);
+            response.put("userCount", userCount);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error getting admin stats: " + e.getMessage());
+            response.put("totalProducts", 0);
+            response.put("totalCategories", 0);
+            response.put("totalUsers", 0);
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+}
     
