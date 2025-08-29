@@ -216,34 +216,69 @@ async function processCheckout(e) {
         // Simulate order processing
         showNotification('Processing your order...');
 
-        // In a real app, you would send this to your backend
-        // const response = await fetch(`${API_BASE_URL}/orders`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': `Bearer ${getAuthToken()}`
-        //     },
-        //     body: JSON.stringify(orderData)
-        // });
+        // Create order in localStorage for tracking
+        const user = getCurrentUser();
+        const orderId = Date.now(); // Simple order ID
+        const order = {
+            id: orderId,
+            userId: user.id,
+            customerName: `${user.firstName} ${user.lastName}`,
+            items: cart,
+            shippingInfo: orderData.shippingInfo,
+            paymentMethod: orderData.paymentMethod,
+            total: orderData.total,
+            status: 'CONFIRMED',
+            date: new Date().toISOString().split('T')[0],
+            timestamp: Date.now()
+        };
+
+        // Save order to localStorage
+        let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        console.log('✅ Order created:', order);
+
+        // Try to send to server (optional)
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            if (response.ok) {
+                console.log('✅ Order synced to server');
+            }
+        } catch (serverError) {
+            console.log('⚠️ Server sync failed, but order saved locally');
+        }
 
         // Simulate successful order
         setTimeout(async () => {
             // Clear cart
             const user = getCurrentUser();
             if (user) {
+                // Clear localStorage cart (new approach)
+                const cartKey = 'userCart_' + user.id;
+                localStorage.removeItem(cartKey);
+                console.log('✅ Local cart cleared for user:', user.id);
+
                 // Clear server-side cart
                 try {
                     await fetch(`${API_BASE_URL}/cart/clear/${user.id}`, {
                         method: 'DELETE'
                     });
+                    console.log('✅ Server cart cleared');
                 } catch (error) {
-                    console.error('Error clearing server cart:', error);
+                    console.error('⚠️ Error clearing server cart:', error);
                 }
             }
 
-            // Clear local cart
-            saveCart([]);
+            // Update cart count and reload cart display
             await updateCartCount();
+            await loadCart();
 
             // Close modal
             document.getElementById('checkout-modal').style.display = 'none';

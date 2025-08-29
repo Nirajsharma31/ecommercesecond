@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .order-display {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛍️ Test Order System</h1>
+    
+    <div class="test-section">
+        <h3>Setup</h3>
+        <button onclick="setupTestUser()" class="success">Setup Test User</button>
+        <button onclick="setupTestCart()" class="success">Setup Test Cart</button>
+        <button onclick="clearAllData()" class="danger">Clear All Data</button>
+        <div id="setup-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Checkout Process</h3>
+        <button onclick="simulateCheckout()">Simulate Checkout</button>
+        <button onclick="checkCartAfterCheckout()">Check Cart After Checkout</button>
+        <div id="checkout-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Order Management</h3>
+        <button onclick="viewAllOrders()">View All Orders</button>
+        <button onclick="getOrderCount()">Get Order Count</button>
+        <button onclick="clearAllOrders()" class="danger">Clear All Orders</button>
+        <div id="order-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Admin Dashboard Test</h3>
+        <button onclick="testAdminStats()">Test Admin Stats</button>
+        <button onclick="openAdminDashboard()">Open Admin Dashboard</button>
+        <div id="admin-status"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info';
+            element.innerHTML = `<div class="order-display" style="background: ${type === 'error' ? '#f8d7da' : type === 'success' ? '#d4edda' : '#d1ecf1'};">${message}</div>`;
+        }
+
+        function setupTestUser() {
+            const testUser = {
+                id: 1,
+                username: 'testuser',
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@example.com',
+                role: 'USER'
+            };
+            
+            localStorage.setItem('user', JSON.stringify(testUser));
+            localStorage.setItem('token', 'test-token-123');
+            
+            setStatus('setup-status', '✅ Test user created: John Doe', 'success');
+        }
+
+        function setupTestCart() {
+            const user = getCurrentUser();
+            if (!user) {
+                setStatus('setup-status', '❌ Please setup test user first', 'error');
+                return;
+            }
+
+            const testCart = [
+                {
+                    id: 1,
+                    name: 'Gaming Laptop',
+                    price: 1299.99,
+                    quantity: 1
+                },
+                {
+                    id: 2,
+                    name: 'Wireless Mouse',
+                    price: 49.99,
+                    quantity: 2
+                }
+            ];
+
+            const cartKey = 'userCart_' + user.id;
+            localStorage.setItem(cartKey, JSON.stringify(testCart));
+            
+            setStatus('setup-status', '✅ Test cart created with 2 products', 'success');
+        }
+
+        async function simulateCheckout() {
+            const user = getCurrentUser();
+            if (!user) {
+                setStatus('checkout-status', '❌ Please setup test user first', 'error');
+                return;
+            }
+
+            const cart = await getCart();
+            if (cart.length === 0) {
+                setStatus('checkout-status', '❌ Please setup test cart first', 'error');
+                return;
+            }
+
+            // Simulate the checkout process
+            const orderId = Date.now();
+            const order = {
+                id: orderId,
+                userId: user.id,
+                customerName: `${user.firstName} ${user.lastName}`,
+                items: cart,
+                shippingInfo: {
+                    fullName: 'John Doe',
+                    address: '123 Test Street',
+                    city: 'Test City',
+                    zipCode: '12345'
+                },
+                paymentMethod: 'Credit Card',
+                total: calculateTotal(cart),
+                status: 'CONFIRMED',
+                date: new Date().toISOString().split('T')[0],
+                timestamp: Date.now()
+            };
+
+            // Save order
+            let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Clear cart
+            const cartKey = 'userCart_' + user.id;
+            localStorage.removeItem(cartKey);
+
+            setStatus('checkout-status', `✅ Order #${orderId} created successfully! Cart cleared.`, 'success');
+        }
+
+        async function checkCartAfterCheckout() {
+            const cart = await getCart();
+            const cartCount = cart.length;
+            
+            if (cartCount === 0) {
+                setStatus('checkout-status', '✅ Cart is empty after checkout (correct behavior)', 'success');
+            } else {
+                setStatus('checkout-status', `❌ Cart still has ${cartCount} items (should be empty)`, 'error');
+            }
+        }
+
+        function viewAllOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            
+            if (orders.length === 0) {
+                setStatus('order-status', 'No orders found', 'info');
+                return;
+            }
+
+            let orderList = `<strong>Found ${orders.length} orders:</strong><br><br>`;
+            orders.forEach(order => {
+                orderList += `Order #${order.id} - ${order.customerName} - $${order.total.toFixed(2)} - ${order.status}<br>`;
+            });
+
+            setStatus('order-status', orderList, 'success');
+        }
+
+        function getOrderCount() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            setStatus('order-status', `Total orders: ${orders.length}`, 'info');
+        }
+
+        function clearAllOrders() {
+            localStorage.removeItem('orders');
+            setStatus('order-status', '✅ All orders cleared', 'success');
+        }
+
+        function clearAllData() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('orders');
+            
+            // Clear all user carts
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('userCart_')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            
+            setStatus('setup-status', '✅ All test data cleared', 'success');
+        }
+
+        function testAdminStats() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            
+            let stats = `Admin Dashboard Stats:<br>`;
+            stats += `Orders: ${orders.length}<br>`;
+            stats += `Users: ${user ? '1' : '0'}<br>`;
+            
+            setStatus('admin-status', stats, 'info');
+        }
+
+        function openAdminDashboard() {
+            window.open('admin.html', '_blank');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = getCurrentUser();
+            if (user) {
+                setStatus('setup-status', `Current user: ${user.firstName} ${user.lastName}`, 'info');
+            } else {
+                setStatus('setup-status', 'No user logged in', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -103,9 +103,13 @@ async function updateStats() {
             document.getElementById('total-categories').textContent = categories.length || '0';
         }
 
-        // Set orders and users to 0 since APIs are not implemented
-        document.getElementById('total-orders').textContent = '0';
-        document.getElementById('total-users').textContent = '0';
+        // Get real order count from localStorage
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        document.getElementById('total-orders').textContent = orders.length;
+        
+        // Get user count (for now just show 1 if there's a logged in user)
+        const users = JSON.parse(localStorage.getItem('user') || 'null');
+        document.getElementById('total-users').textContent = users ? '1' : '0';
     } catch (error) {
         console.error('Error updating stats:', error);
         // Fallback values
@@ -206,23 +210,62 @@ function populateCategoryDropdown(categories) {
     });
 }
 
-// Load orders (API not implemented yet)
+// Load orders from localStorage
 function loadOrders() {
     const tbody = document.getElementById('orders-table-body');
-
-    // Show message that orders API is not implemented
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                <div>
-                    <p><strong>Orders Management Not Available</strong></p>
-                    <p>The orders API endpoints are not implemented yet.</p>
-                    <p>This feature will be available once the OrderController is fully implemented.</p>
-                </div>
-            </td>
-        </tr>
-    `;
-    return;
+    
+    try {
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        
+        if (orders.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                        <div>
+                            <p><strong>No Orders Found</strong></p>
+                            <p>No orders have been placed yet.</p>
+                            <p>Orders will appear here after customers complete checkout.</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Sort orders by timestamp (newest first)
+        orders.sort((a, b) => b.timestamp - a.timestamp);
+        
+        tbody.innerHTML = orders.map(order => `
+            <tr>
+                <td>#${order.id}</td>
+                <td>${order.customerName}</td>
+                <td>$${order.total.toFixed(2)}</td>
+                <td>
+                    <select onchange="updateOrderStatus(${order.id}, this.value)">
+                        <option value="PENDING" ${order.status === 'PENDING' ? 'selected' : ''}>Pending</option>
+                        <option value="CONFIRMED" ${order.status === 'CONFIRMED' ? 'selected' : ''}>Confirmed</option>
+                        <option value="SHIPPED" ${order.status === 'SHIPPED' ? 'selected' : ''}>Shipped</option>
+                        <option value="DELIVERED" ${order.status === 'DELIVERED' ? 'selected' : ''}>Delivered</option>
+                        <option value="CANCELLED" ${order.status === 'CANCELLED' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                </td>
+                <td>${order.date}</td>
+                <td>
+                    <button class="action-btn edit-btn" onclick="viewOrder(${order.id})">View</button>
+                </td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 20px; color: #e74c3c;">
+                    <p>Error loading orders</p>
+                </td>
+            </tr>
+        `;
+    }
 
     // Old mock data (commented out)
     const mockOrders = [
@@ -460,13 +503,56 @@ function deleteCategory(id) {
 }
 
 function updateOrderStatus(orderId, status) {
-    console.log('Update order status:', orderId, status);
-    showNotification('Order status updated successfully!');
+    try {
+        let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const orderIndex = orders.findIndex(order => order.id == orderId);
+        
+        if (orderIndex !== -1) {
+            orders[orderIndex].status = status;
+            localStorage.setItem('orders', JSON.stringify(orders));
+            console.log('✅ Order status updated:', orderId, status);
+            showNotification(`Order #${orderId} status updated to ${status}!`);
+        } else {
+            showNotification('Order not found!', 'error');
+        }
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        showNotification('Failed to update order status', 'error');
+    }
 }
 
 function viewOrder(id) {
-    console.log('View order:', id);
-    alert('Order details would be shown here');
+    try {
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const order = orders.find(order => order.id == id);
+        
+        if (order) {
+            let orderDetails = `Order #${order.id}\n\n`;
+            orderDetails += `Customer: ${order.customerName}\n`;
+            orderDetails += `Date: ${order.date}\n`;
+            orderDetails += `Status: ${order.status}\n`;
+            orderDetails += `Payment: ${order.paymentMethod}\n\n`;
+            
+            orderDetails += `Shipping Address:\n`;
+            orderDetails += `${order.shippingInfo.fullName}\n`;
+            orderDetails += `${order.shippingInfo.address}\n`;
+            orderDetails += `${order.shippingInfo.city}, ${order.shippingInfo.zipCode}\n\n`;
+            
+            orderDetails += `Items:\n`;
+            order.items.forEach(item => {
+                orderDetails += `- ${item.name} x${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+            });
+            
+            orderDetails += `\nTotal: $${order.total.toFixed(2)}`;
+            
+            alert(orderDetails);
+        } else {
+            alert('Order not found!');
+        }
+    } catch (error) {
+        console.error('Error viewing order:', error);
+        alert('Error loading order details');
+    }
 }
 
 function toggleUserStatus(id) {
