@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Shop - Home</title>
+    <title>E-Shop - Premium Online Shopping Experience</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="description" content="Discover premium products at E-Shop. Your trusted destination for quality shopping with fast delivery and excellent customer service.">
 </head>
 <body>
     <header>
-        <nav class="navbar">
+        <nav class="navbar" id="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <a href="index.html"><h2>E-Shop</h2></a>
+                    <a href="index.html">
+                        <h2>🛍️ E-Shop</h2>
+                    </a>
                 </div>
-                <ul class="nav-menu">
+                <ul class="nav-menu" id="nav-menu">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link active">Home</a>
+                        <a href="index.html" class="nav-link active">🏠 Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="products.html" class="nav-link">Products</a>
+                        <a href="products.html" class="nav-link">📦 Products</a>
                     </li>
                     <li class="nav-item">
-                        <a href="categories.html" class="nav-link">Categories</a>
+                        <a href="categories.html" class="nav-link">🏷️ Categories</a>
                     </li>
                     <li class="nav-item">
-                        <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="cart-count">0</span></a>
+                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
                     </li>
                     <li class="nav-item" id="auth-nav">
-                        <a href="login.html" class="nav-link">Login</a>
+                        <a href="login.html" class="nav-link">👤 Login</a>
                     </li>
                 </ul>
-                <div class="hamburger">
+                <div class="hamburger" id="hamburger">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -40,65 +45,184 @@
     </header>
 
     <main>
+        <!-- Hero Section -->
         <section class="hero">
-            <div class="hero-content">
-                <h1>Welcome to E-Shop</h1>
-                <p>Your one-stop destination for all your shopping needs</p>
-                <button class="cta-button" onclick="scrollToProducts()">Shop Now</button>
+            <div class="container">
+                <div class="hero-content animate-fade-in-up">
+                    <h1>Welcome to E-Shop</h1>
+                    <p>Discover premium products with unbeatable quality and service. Your satisfaction is our priority.</p>
+                    <button class="cta-button" onclick="scrollToProducts()">
+                        🚀 Start Shopping
+                    </button>
+                </div>
             </div>
         </section>
 
+        <!-- Featured Products Section -->
         <section class="products" id="featured-products">
             <div class="container">
-                <h2>Featured Products</h2>
-                <div id="products-grid" class="products-grid">
-                    <div class="loading">Loading products...</div>
-                </div>
-                <div class="view-all-container">
-                    <a href="products.html" class="view-all-btn">View All Products</a>
+                <div class="animate-fade-in-up">
+                    <h2>✨ Featured Products</h2>
+                    <div id="products-grid" class="products-grid">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading amazing products...</p>
+                        </div>
+                    </div>
+                    <div class="view-all-container">
+                        <a href="products.html" class="btn btn-primary btn-lg">
+                            View All Products →
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- Categories Preview Section -->
         <section class="categories-preview">
             <div class="container">
-                <h2>Shop by Category</h2>
-                <div id="categories-grid" class="categories-grid">
-                    <div class="loading">Loading categories...</div>
+                <div class="animate-fade-in-up">
+                    <h2>🏷️ Shop by Category</h2>
+                    <div id="categories-grid" class="categories-grid">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading categories...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" style="padding: var(--space-20) 0; background: var(--bg-primary);">
+            <div class="container">
+                <div class="animate-fade-in-up">
+                    <h2 class="text-center mb-8">Why Choose E-Shop?</h2>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-8);">
+                        <div class="card text-center">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-4);">🚚</div>
+                            <h3 class="mb-4">Fast Delivery</h3>
+                            <p>Get your orders delivered quickly with our express shipping options.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-4);">🔒</div>
+                            <h3 class="mb-4">Secure Shopping</h3>
+                            <p>Shop with confidence knowing your data and payments are protected.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-4);">💎</div>
+                            <h3 class="mb-4">Premium Quality</h3>
+                            <p>We curate only the finest products from trusted brands and suppliers.</p>
+                        </div>
+                        <div class="card text-center">
+                            <div style="font-size: 3rem; margin-bottom: var(--space-4);">🎧</div>
+                            <h3 class="mb-4">24/7 Support</h3>
+                            <p>Our customer service team is always ready to help you with any questions.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Modern Footer -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>E-Shop</h3>
-                <p>Your trusted online shopping destination</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ E-Shop</h3>
+                    <p>Your premium online shopping destination. Quality products, exceptional service, and customer satisfaction guaranteed.</p>
+                    <div style="margin-top: var(--space-4);">
+                        <span class="badge badge-success">Trusted by 10,000+ customers</span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>🔗 Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="login.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>🛡️ Customer Care</h4>
+                    <ul>
+                        <li><a href="#">Contact Support</a></li>
+                        <li><a href="#">FAQ & Help</a></li>
+                        <li><a href="#">Returns & Refunds</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>📱 Connect With Us</h4>
+                    <ul>
+                        <li><a href="#">📧 Newsletter</a></li>
+                        <li><a href="#">📱 Mobile App</a></li>
+                        <li><a href="#">💬 Live Chat</a></li>
+                        <li><a href="#">⭐ Reviews</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="categories.html">Categories</a></li>
-                    <li><a href="cart.html">Cart</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Shop. All rights reserved. | Made with ❤️ for amazing customers</p>
             </div>
-            <div class="footer-section">
-                <h4>Customer Service</h4>
-                <ul>
-                    <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Returns</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 E-Shop. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/home.js"></script>
+    
+    <!-- Add scroll animations -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('hamburger').addEventListener('click', () => {
+            document.getElementById('nav-menu').classList.toggle('active');
+        });
+
+        // Smooth scroll to products
+        function scrollToProducts() {
+            document.getElementById('featured-products').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Add intersection observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe animated elements
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate-fade-in-up');
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                observer.observe(el);
+            });
+        });
+    </script>
 </body>
 </html>

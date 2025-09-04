@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Shop - Admin Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="description" content="E-Shop Admin Dashboard - Manage products, categories, orders, and users.">
 </head>
-
 <body>
     <header>
-        <nav class="navbar">
+        <nav class="navbar" id="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
                     <a href="index.html">
-                        <h2>E-Shop Admin</h2>
+                        <h2>🛍️ E-Shop Admin</h2>
                     </a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="index.html" class="nav-link">🏠 Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="admin.html" class="nav-link active">Dashboard</a>
+                        <a href="products.html" class="nav-link">📦 Products</a>
                     </li>
-                    <li class="nav-item" id="admin-auth-nav">
-                        <a href="#" class="nav-link" onclick="logout()">Logout</a>
+                    <li class="nav-item">
+                        <a href="categories.html" class="nav-link">🏷️ Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
+                    </li>
+                    <li class="nav-item" id="auth-nav">
+                        <a href="login.html" class="nav-link">👤 Login</a>
                     </li>
                 </ul>
             </div>
@@ -34,48 +41,75 @@
 
     <main class="admin-page">
         <div class="container">
+            <!-- Admin Header -->
             <div class="admin-header">
-                <h1>Admin Dashboard</h1>
-                <div class="admin-stats">
-                    <div class="stat-card">
-                        <h3 id="total-products">0</h3>
-                        <p>Total Products</p>
+                <div class="animate-fade-in-up">
+                    <div style="text-align: center; margin-bottom: var(--space-4);">
+                        <div style="font-size: 4rem; margin-bottom: var(--space-2);">⚡</div>
+                        <h1>Admin Dashboard</h1>
+                        <p>Manage your e-commerce empire with powerful tools</p>
                     </div>
-                    <div class="stat-card">
-                        <h3 id="total-categories">0</h3>
-                        <p>Categories</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="total-orders">0</h3>
-                        <p>Orders</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="total-users">0</h3>
-                        <p>Users</p>
+                    
+                    <!-- Enhanced Statistics Cards -->
+                    <div class="admin-stats">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">📦</div>
+                            <h3 id="total-products">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">🏷️</div>
+                            <h3 id="total-categories">0</h3>
+                            <p>Categories</p>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">📋</div>
+                            <h3 id="total-orders">0</h3>
+                            <p>Orders</p>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <div style="font-size: 1.5rem; margin-bottom: var(--space-2);">👥</div>
+                            <h3 id="total-users">0</h3>
+                            <p>Users</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Enhanced Admin Tabs -->
             <div class="admin-tabs">
-                <button class="admin-tab-btn active" data-tab="products">Products</button>
-                <button class="admin-tab-btn" data-tab="categories">Categories</button>
-                <button class="admin-tab-btn" data-tab="orders">Orders</button>
-                <button class="admin-tab-btn" data-tab="users">Users</button>
+                <button class="admin-tab-btn active" data-tab="products">
+                    📦 Products
+                </button>
+                <button class="admin-tab-btn" data-tab="categories">
+                    🏷️ Categories
+                </button>
+                <button class="admin-tab-btn" data-tab="orders">
+                    📋 Orders
+                </button>
+                <button class="admin-tab-btn" data-tab="users">
+                    👥 Users
+                </button>
             </div>
 
-            <!-- Products Management -->
+            <!-- Products Section -->
             <div class="admin-section active" id="products-section">
                 <div class="section-header">
-                    <h2>Products Management</h2>
-                    <div class="section-actions">
-                        <button class="add-btn" onclick="openAddProductModal()">Add Product</button>
-                        <button class="delete-all-btn" onclick="deleteAllProducts()" style="background-color: #e74c3c; margin-left: 10px;">Delete All Products</button>
-                        <button class="debug-btn" onclick="debugProducts()" style="background-color: #3498db; margin-left: 10px;">Debug Images</button>
-                        <button class="fix-btn" onclick="fixProductImages()" style="background-color: #f39c12; margin-left: 10px;">Fix Images</button>
+                    <h2>📦 Products Management</h2>
+                    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+                        <button class="add-btn" onclick="openAddProductModal()">
+                            ➕ Add Product
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshCategories()">
+                            🔄 Refresh Categories
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteAllProducts()" style="background: linear-gradient(135deg, var(--danger-color), #dc2626);">
+                            🗑️ Delete All
+                        </button>
                     </div>
                 </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
+                <div class="table-container">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -88,42 +122,56 @@
                             </tr>
                         </thead>
                         <tbody id="products-table-body">
-                            <!-- Products will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- Categories Management -->
-            <div class="admin-section" id="categories-section">
-                <div class="section-header">
-                    <h2>Categories Management</h2>
-                    <button class="add-btn" onclick="openAddCategoryModal()">Add Category</button>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
-                        <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Products Count</th>
-                                <th>Actions</th>
+                                <td colspan="7" style="text-align: center; padding: var(--space-8);">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading products...</p>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody id="categories-table-body">
-                            <!-- Categories will be loaded here -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Orders Management -->
+            <!-- Categories Section -->
+            <div class="admin-section" id="categories-section">
+                <div class="section-header">
+                    <h2>🏷️ Categories Management</h2>
+                    <button class="add-btn" onclick="openAddCategoryModal()">
+                        ➕ Add Category
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Products</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: var(--space-8);">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading categories...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
             <div class="admin-section" id="orders-section">
                 <div class="section-header">
-                    <h2>Orders Management</h2>
+                    <h2>📋 Orders Management</h2>
+                    <div class="badge badge-info">Real-time order tracking</div>
                 </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
+                <div class="table-container">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Order ID</th>
@@ -135,23 +183,29 @@
                             </tr>
                         </thead>
                         <tbody id="orders-table-body">
-                            <!-- Orders will be loaded here -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: var(--space-8);">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading orders...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Users Management -->
+            <!-- Users Section -->
             <div class="admin-section" id="users-section">
                 <div class="section-header">
-                    <h2>Users Management</h2>
+                    <h2>👥 Users Management</h2>
+                    <div class="badge badge-success">User analytics</div>
                 </div>
-                <div class="admin-table-container">
-                    <table class="admin-table">
+                <div class="table-container">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Username</th>
+                                <th>Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Status</th>
@@ -159,7 +213,12 @@
                             </tr>
                         </thead>
                         <tbody id="users-table-body">
-                            <!-- Users will be loaded here -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: var(--space-8);">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading users...</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -167,93 +226,186 @@
         </div>
     </main>
 
-    <!-- Add/Edit Product Modal -->
+    <!-- Enhanced Product Modal -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 id="product-modal-title">➕ Add New Product</h2>
+                <button class="close">&times;</button>
+            </div>
             <div class="modal-body">
-                <h2 id="product-modal-title">Add Product</h2>
-                <form id="product-form">
+                <form id="product-form" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="product-name">Product Name</label>
-                        <input type="text" id="product-name" name="product-name" required>
+                        <label for="product-name">📝 Product Name</label>
+                        <input type="text" id="product-name" placeholder="Enter product name" required>
                     </div>
                     <div class="form-group">
-                        <label for="product-description">Description</label>
-                        <textarea id="product-description" name="product-description"></textarea>
+                        <label for="product-description">📄 Description</label>
+                        <textarea id="product-description" rows="3" placeholder="Describe your product"></textarea>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="product-price">Price</label>
-                            <input type="number" id="product-price" name="product-price" step="0.01" required>
+                            <label for="product-price">💰 Price</label>
+                            <input type="number" id="product-price" step="0.01" placeholder="0.00" required>
                         </div>
                         <div class="form-group">
-                            <label for="product-stock">Stock Quantity</label>
-                            <input type="number" id="product-stock" name="product-stock" required>
+                            <label for="product-stock">📦 Stock Quantity</label>
+                            <input type="number" id="product-stock" placeholder="0" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="product-category">Category</label>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <select id="product-category" name="product-category" required style="flex: 1;">
-                                    <option value="">Select Category</option>
-                                </select>
-                                <button type="button" onclick="refreshCategories()" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Refresh</button>
-                            </div>
+                            <label for="product-category">🏷️ Category</label>
+                            <select id="product-category" required>
+                                <option value="">Select Category</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label for="product-brand">Brand</label>
-                            <input type="text" id="product-brand" name="product-brand">
+                            <label for="product-brand">🏢 Brand</label>
+                            <input type="text" id="product-brand" placeholder="Brand name">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="product-image">Product Image</label>
-                        <input type="file" id="product-image" name="product-image" accept="image/*">
-                        <small>Select an image file from your computer</small>
+                        <label for="product-image">🖼️ Product Image</label>
+                        <input type="file" id="product-image" accept="image/*">
+                        <small>Upload a high-quality image (JPG, PNG, WebP)</small>
                     </div>
-                    <button type="submit" class="save-btn">Save Product</button>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        ✨ Save Product
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Add/Edit Category Modal -->
+    <!-- Enhanced Category Modal -->
     <div id="category-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 id="category-modal-title">🏷️ Add New Category</h2>
+                <button class="close">&times;</button>
+            </div>
             <div class="modal-body">
-                <h2 id="category-modal-title">Add Category</h2>
                 <form id="category-form">
                     <div class="form-group">
-                        <label for="category-name">Category Name</label>
-                        <input type="text" id="category-name" name="category-name" required>
+                        <label for="category-name">📝 Category Name</label>
+                        <input type="text" id="category-name" placeholder="Enter category name" required>
                     </div>
                     <div class="form-group">
-                        <label for="category-description">Description</label>
-                        <textarea id="category-description" name="category-description"></textarea>
+                        <label for="category-description">📄 Description</label>
+                        <textarea id="category-description" rows="3" placeholder="Describe this category"></textarea>
                     </div>
-                    <button type="submit" class="save-btn">Save Category</button>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                        ✨ Save Category
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Enhanced Footer -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>E-Shop Admin</h3>
-                <p>Administrative Dashboard</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ E-Shop Admin</h3>
+                    <p>Powerful administrative tools for managing your online store with ease and efficiency.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🔧 Admin Tools</h4>
+                    <ul>
+                        <li><a href="#products-section">Product Management</a></li>
+                        <li><a href="#categories-section">Category Management</a></li>
+                        <li><a href="#orders-section">Order Processing</a></li>
+                        <li><a href="#users-section">User Management</a></li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 E-Shop. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Shop Admin Panel. All rights reserved. | Built with ❤️ for administrators</p>
+            </div>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/admin.js"></script>
-    <script src="js/admin-orders-fix.js"></script>
-</body>
+    
+    <script>
+        // Enhanced admin dashboard functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add scroll effect to navbar
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
 
+            // Add animation to stat cards
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease-out forwards';
+            });
+
+            // Add hover effects to tables
+            const tables = document.querySelectorAll('.table tbody tr');
+            tables.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    row.style.transform = 'scale(1.01)';
+                    row.style.transition = 'transform 0.2s ease';
+                });
+                row.addEventListener('mouseleave', () => {
+                    row.style.transform = 'scale(1)';
+                });
+            });
+        });
+
+        // Enhanced notification system
+        function showNotification(message, type = 'success') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create enhanced notification
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <span style="font-size: 1.2rem;">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto remove with animation
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.transform = 'translateX(100%)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // Add loading states to buttons
+        function addLoadingState(button, originalText) {
+            button.disabled = true;
+            button.innerHTML = `<div class="loading-spinner" style="width: 16px; height: 16px; margin-right: var(--space-2);"></div> Loading...`;
+            
+            return () => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            };
+        }
+    </script>
+</body>
 </html>

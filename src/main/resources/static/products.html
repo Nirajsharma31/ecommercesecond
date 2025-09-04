@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Shop - Products</title>
+    <title>E-Shop - Premium Products Collection</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="description" content="Discover our premium collection of products at E-Shop. Quality guaranteed with fast delivery.">
 </head>
 <body>
     <header>
-        <nav class="navbar">
+        <nav class="navbar" id="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <a href="index.html"><h2>E-Shop</h2></a>
+                    <a href="index.html">
+                        <h2>🛍️ E-Shop</h2>
+                    </a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="index.html" class="nav-link">🏠 Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="products.html" class="nav-link active">Products</a>
+                        <a href="products.html" class="nav-link active">📦 Products</a>
                     </li>
                     <li class="nav-item">
-                        <a href="categories.html" class="nav-link">Categories</a>
+                        <a href="categories.html" class="nav-link">🏷️ Categories</a>
                     </li>
                     <li class="nav-item">
-                        <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="cart-count">0</span></a>
+                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
                     </li>
                     <li class="nav-item" id="auth-nav">
-                        <a href="login.html" class="nav-link">Login</a>
+                        <a href="login.html" class="nav-link">👤 Login</a>
                     </li>
                 </ul>
             </div>
@@ -36,27 +41,34 @@
 
     <main class="products-page">
         <div class="container">
+            <!-- Enhanced Page Header -->
             <div class="page-header">
-                <h1>All Products</h1>
+                <div style="font-size: 3rem; margin-bottom: var(--space-2);">📦</div>
+                <h1>Premium Products</h1>
+                <p>Discover our curated collection of high-quality products</p>
+                
+                <!-- Enhanced Search and Filters -->
                 <div class="search-filter-container">
                     <div class="search-box">
-                        <input type="text" id="search-input" placeholder="Search products...">
-                        <button id="search-btn">Search</button>
-                        <button onclick="debugCart()" style="background: #e74c3c; margin-left: 10px;">Debug Cart</button>
+                        <input type="text" id="search-input" placeholder="🔍 Search amazing products...">
+                        <button id="search-btn" class="btn btn-primary">
+                            Search
+                        </button>
                     </div>
+                    
                     <div class="filters">
                         <select id="category-filter">
-                            <option value="">All Categories</option>
+                            <option value="">🏷️ All Categories</option>
                         </select>
                         <select id="price-filter">
-                            <option value="">All Prices</option>
+                            <option value="">💰 All Prices</option>
                             <option value="0-50">$0 - $50</option>
                             <option value="50-100">$50 - $100</option>
                             <option value="100-200">$100 - $200</option>
                             <option value="200+">$200+</option>
                         </select>
                         <select id="sort-filter">
-                            <option value="">Sort By</option>
+                            <option value="">📊 Sort By</option>
                             <option value="name-asc">Name A-Z</option>
                             <option value="name-desc">Name Z-A</option>
                             <option value="price-asc">Price Low to High</option>
@@ -66,63 +78,208 @@
                 </div>
             </div>
 
+            <!-- Products Container -->
             <div class="products-container">
                 <div id="products-grid" class="products-grid">
-                    <div class="loading">Loading products...</div>
+                    <div style="text-align: center; padding: var(--space-12); grid-column: 1 / -1;">
+                        <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
+                        <p>Loading amazing products...</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="pagination" id="pagination">
+            <!-- Enhanced Pagination -->
+            <div class="pagination" id="pagination" style="display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-8);">
                 <!-- Pagination will be added here -->
             </div>
         </div>
     </main>
 
-    <!-- Product Detail Modal -->
+    <!-- Enhanced Product Detail Modal -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-product-name">Product Details</h2>
+                <button class="close">&times;</button>
+            </div>
             <div class="modal-body">
-                <div class="product-image">
-                    <img id="modal-product-image" src="" alt="">
-                </div>
-                <div class="product-details">
-                    <h2 id="modal-product-name"></h2>
-                    <p id="modal-product-description"></p>
-                    <div class="product-price" id="modal-product-price"></div>
-                    <div class="product-brand" id="modal-product-brand"></div>
-                    <div class="product-stock" id="modal-product-stock"></div>
-                    <div class="quantity-selector">
-                        <label for="quantity">Quantity:</label>
-                        <input type="number" id="quantity" min="1" value="1">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: start;">
+                    <!-- Product Image -->
+                    <div class="product-image" style="width: 100%; height: 300px; border-radius: var(--radius-xl); overflow: hidden; background: var(--gray-50);">
+                        <img id="modal-product-image" src="" alt="" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
-                    <button class="add-to-cart-btn" id="modal-add-to-cart">Add to Cart</button>
+                    
+                    <!-- Product Details -->
+                    <div class="product-details">
+                        <div class="badge badge-success mb-4" id="modal-product-category">Category</div>
+                        
+                        <p id="modal-product-description" style="color: var(--text-secondary); margin-bottom: var(--space-4); line-height: 1.6;"></p>
+                        
+                        <div style="margin-bottom: var(--space-4);">
+                            <div class="product-price" id="modal-product-price" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);"></div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-6);">
+                            <div>
+                                <strong>🏢 Brand:</strong>
+                                <div id="modal-product-brand" style="color: var(--text-secondary);"></div>
+                            </div>
+                            <div>
+                                <strong>📦 Stock:</strong>
+                                <div id="modal-product-stock" style="color: var(--text-secondary);"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="quantity-selector" style="margin-bottom: var(--space-6);">
+                            <label for="quantity" style="display: block; margin-bottom: var(--space-2); font-weight: 500;">📊 Quantity:</label>
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <button type="button" onclick="changeQuantity(-1)" class="btn btn-secondary btn-sm">-</button>
+                                <input type="number" id="quantity" min="1" value="1" style="width: 80px; text-align: center;">
+                                <button type="button" onclick="changeQuantity(1)" class="btn btn-secondary btn-sm">+</button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-success btn-lg" id="modal-add-to-cart" style="width: 100%;">
+                            🛒 Add to Cart
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Enhanced Footer -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>E-Shop</h3>
-                <p>Your trusted online shopping destination</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ E-Shop</h3>
+                    <p>Your trusted destination for premium products with guaranteed quality and fast delivery.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🔗 Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="login.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>🛡️ Why Choose Us</h4>
+                    <ul>
+                        <li><a href="#">✅ Quality Guaranteed</a></li>
+                        <li><a href="#">🚚 Fast Delivery</a></li>
+                        <li><a href="#">🔒 Secure Shopping</a></li>
+                        <li><a href="#">↩️ Easy Returns</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="categories.html">Categories</a></li>
-                    <li><a href="cart.html">Cart</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Shop. All rights reserved. | Premium shopping experience 🌟</p>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 E-Shop. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/products.js"></script>
+    
+    <script>
+        // Enhanced products page functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add scroll effect to navbar
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Add stagger animation to product cards
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            });
+
+            // Observe product cards for animations
+            setTimeout(() => {
+                const productCards = document.querySelectorAll('.product-card');
+                productCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(card);
+                });
+            }, 1000);
+        });
+
+        // Quantity change function for modal
+        function changeQuantity(delta) {
+            const quantityInput = document.getElementById('quantity');
+            const currentValue = parseInt(quantityInput.value) || 1;
+            const newValue = Math.max(1, currentValue + delta);
+            quantityInput.value = newValue;
+        }
+
+        // Enhanced search functionality
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('search-btn').click();
+            }
+        });
+
+        // Add loading states to filters
+        function addFilterLoadingState() {
+            const filters = document.querySelectorAll('select');
+            filters.forEach(filter => {
+                filter.style.opacity = '0.6';
+                filter.disabled = true;
+            });
+
+            return () => {
+                filters.forEach(filter => {
+                    filter.style.opacity = '1';
+                    filter.disabled = false;
+                });
+            };
+        }
+
+        // Enhanced product card hover effects
+        const style = document.createElement('style');
+        style.textContent = `
+            .product-card {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .product-card:hover {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: var(--shadow-2xl);
+            }
+            
+            .product-card:hover .product-image img {
+                transform: scale(1.1);
+            }
+            
+            .search-box input:focus {
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                border-color: var(--primary-color);
+            }
+            
+            .filters select:focus {
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+                border-color: var(--primary-color);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

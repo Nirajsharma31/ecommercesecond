@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Shop - Categories</title>
+    <title>E-Shop - Product Categories</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="description" content="Browse products by categories at E-Shop. Find exactly what you're looking for in our organized collections.">
 </head>
 <body>
     <header>
-        <nav class="navbar">
+        <nav class="navbar" id="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <a href="index.html"><h2>E-Shop</h2></a>
+                    <a href="index.html">
+                        <h2>🛍️ E-Shop</h2>
+                    </a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="index.html" class="nav-link">🏠 Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="products.html" class="nav-link">Products</a>
+                        <a href="products.html" class="nav-link">📦 Products</a>
                     </li>
                     <li class="nav-item">
-                        <a href="categories.html" class="nav-link active">Categories</a>
+                        <a href="categories.html" class="nav-link active">🏷️ Categories</a>
                     </li>
                     <li class="nav-item">
-                        <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="cart-count">0</span></a>
+                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
                     </li>
                     <li class="nav-item" id="auth-nav">
-                        <a href="login.html" class="nav-link">Login</a>
+                        <a href="login.html" class="nav-link">👤 Login</a>
                     </li>
                 </ul>
             </div>
@@ -36,48 +41,258 @@
 
     <main class="categories-page">
         <div class="container">
+            <!-- Enhanced Page Header -->
             <div class="page-header">
+                <div style="font-size: 3rem; margin-bottom: var(--space-2);">🏷️</div>
                 <h1>Shop by Categories</h1>
-                <p>Browse our wide range of product categories</p>
+                <p>Discover our carefully curated product collections organized for your convenience</p>
             </div>
 
+            <!-- Categories Grid -->
             <div id="categories-grid" class="categories-grid-large">
-                <div class="loading">Loading categories...</div>
+                <div style="text-align: center; padding: var(--space-12); grid-column: 1 / -1;">
+                    <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
+                    <p>Loading amazing categories...</p>
+                </div>
             </div>
 
+            <!-- Category Products Section -->
             <div id="category-products" class="category-products-section" style="display: none;">
                 <div class="section-header">
-                    <h2 id="selected-category-name">Category Products</h2>
-                    <button id="back-to-categories" class="back-btn">← Back to Categories</button>
+                    <div>
+                        <h2 id="selected-category-name" style="display: flex; align-items: center; gap: var(--space-2);">
+                            <span>🏷️</span>
+                            <span>Category Products</span>
+                        </h2>
+                        <p id="selected-category-description" style="color: var(--text-secondary); margin-top: var(--space-2);"></p>
+                    </div>
+                    <button id="back-to-categories" class="btn btn-secondary">
+                        ← Back to Categories
+                    </button>
                 </div>
+                
+                <!-- Category Stats -->
+                <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-8); flex-wrap: wrap;">
+                    <div class="badge badge-info" id="category-product-count">
+                        📦 0 Products
+                    </div>
+                    <div class="badge badge-success">
+                        ✅ Quality Assured
+                    </div>
+                    <div class="badge badge-warning">
+                        🚚 Fast Delivery
+                    </div>
+                </div>
+                
                 <div id="category-products-grid" class="products-grid">
-                    <!-- Products will be loaded here -->
+                    <div style="text-align: center; padding: var(--space-8); grid-column: 1 / -1;">
+                        <div class="loading-spinner" style="margin: 0 auto var(--space-4);"></div>
+                        <p>Loading category products...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Enhanced Footer -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>E-Shop</h3>
-                <p>Your trusted online shopping destination</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ E-Shop</h3>
+                    <p>Your trusted destination for organized shopping with carefully curated categories and premium products.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🔗 Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="login.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>🏷️ Popular Categories</h4>
+                    <ul id="footer-categories">
+                        <li><a href="#">📱 Electronics</a></li>
+                        <li><a href="#">👕 Fashion</a></li>
+                        <li><a href="#">🏠 Home & Garden</a></li>
+                        <li><a href="#">📚 Books</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>🛡️ Shopping Benefits</h4>
+                    <ul>
+                        <li><a href="#">✅ Organized Collections</a></li>
+                        <li><a href="#">🔍 Easy Navigation</a></li>
+                        <li><a href="#">🎯 Targeted Shopping</a></li>
+                        <li><a href="#">💎 Curated Quality</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="categories.html">Categories</a></li>
-                    <li><a href="cart.html">Cart</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Shop. All rights reserved. | Organized shopping made simple 🎯</p>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 E-Shop. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/categories.js"></script>
+    
+    <script>
+        // Enhanced categories page functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add scroll effect to navbar
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Add stagger animation to category cards
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0) scale(1)';
+                        }, index * 150);
+                    }
+                });
+            });
+
+            // Observe category cards for animations
+            setTimeout(() => {
+                const categoryCards = document.querySelectorAll('.category-card-large');
+                categoryCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px) scale(0.95)';
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    observer.observe(card);
+                });
+            }, 1000);
+
+            // Add smooth transitions for category switching
+            const categoryProductsSection = document.getElementById('category-products');
+            const categoriesGrid = document.getElementById('categories-grid');
+
+            // Enhanced back to categories functionality
+            document.getElementById('back-to-categories').addEventListener('click', () => {
+                categoryProductsSection.style.opacity = '0';
+                categoryProductsSection.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    categoryProductsSection.style.display = 'none';
+                    categoriesGrid.style.display = 'grid';
+                    
+                    setTimeout(() => {
+                        categoriesGrid.style.opacity = '1';
+                        categoriesGrid.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 300);
+            });
+        });
+
+        // Enhanced category selection with smooth transitions
+        function showCategoryProducts(categoryId, categoryName, categoryDescription) {
+            const categoryProductsSection = document.getElementById('category-products');
+            const categoriesGrid = document.getElementById('categories-grid');
+            
+            // Fade out categories grid
+            categoriesGrid.style.opacity = '0';
+            categoriesGrid.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                categoriesGrid.style.display = 'none';
+                
+                // Update category info
+                document.getElementById('selected-category-name').innerHTML = `
+                    <span>🏷️</span>
+                    <span>${categoryName}</span>
+                `;
+                document.getElementById('selected-category-description').textContent = 
+                    categoryDescription || `Explore our ${categoryName.toLowerCase()} collection`;
+                
+                // Show category products section
+                categoryProductsSection.style.display = 'block';
+                categoryProductsSection.style.opacity = '0';
+                categoryProductsSection.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    categoryProductsSection.style.opacity = '1';
+                    categoryProductsSection.style.transform = 'translateY(0)';
+                }, 50);
+            }, 300);
+        }
+
+        // Add enhanced hover effects and animations
+        const style = document.createElement('style');
+        style.textContent = `
+            .category-card-large {
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .category-card-large::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .category-card-large:hover::before {
+                opacity: 1;
+            }
+            
+            .category-card-large:hover {
+                transform: translateY(-12px) scale(1.05);
+                box-shadow: var(--shadow-2xl);
+            }
+            
+            .category-products-section {
+                transition: all 0.3s ease;
+            }
+            
+            #categories-grid {
+                transition: all 0.3s ease;
+            }
+            
+            .section-header {
+                animation: fadeInUp 0.6s ease-out;
+            }
+            
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Update footer categories dynamically
+        function updateFooterCategories(categories) {
+            const footerCategories = document.getElementById('footer-categories');
+            if (categories && categories.length > 0) {
+                footerCategories.innerHTML = categories.slice(0, 4).map(category => 
+                    `<li><a href="#" onclick="showCategoryProducts(${category.id}, '${category.name}', '${category.description || ''}')">${category.name}</a></li>`
+                ).join('');
+            }
+        }
+    </script>
 </body>
 </html>

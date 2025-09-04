@@ -5,29 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Shop - Shopping Cart</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="description" content="Review your shopping cart and proceed to checkout at E-Shop.">
 </head>
 <body>
     <header>
-        <nav class="navbar">
+        <nav class="navbar" id="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <a href="index.html"><h2>E-Shop</h2></a>
+                    <a href="index.html">
+                        <h2>🛍️ E-Shop</h2>
+                    </a>
                 </div>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="index.html" class="nav-link">Home</a>
+                        <a href="index.html" class="nav-link">🏠 Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="products.html" class="nav-link">Products</a>
+                        <a href="products.html" class="nav-link">📦 Products</a>
                     </li>
                     <li class="nav-item">
-                        <a href="categories.html" class="nav-link">Categories</a>
+                        <a href="categories.html" class="nav-link">🏷️ Categories</a>
                     </li>
                     <li class="nav-item">
-                        <a href="cart.html" class="nav-link active">Cart <span id="cart-count" class="cart-count">0</span></a>
+                        <a href="cart.html" class="nav-link active">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
                     </li>
                     <li class="nav-item" id="auth-nav">
-                        <a href="login.html" class="nav-link">Login</a>
+                        <a href="login.html" class="nav-link">👤 Login</a>
                     </li>
                 </ul>
             </div>
@@ -36,129 +41,260 @@
 
     <main class="cart-page">
         <div class="container">
-            <div class="page-header">
+            <!-- Cart Header -->
+            <div class="cart-header">
+                <div style="font-size: 3rem; margin-bottom: var(--space-2);">🛒</div>
                 <h1>Shopping Cart</h1>
-                <button onclick="testCartFunctions()" style="background: #e74c3c; color: white; padding: 10px; margin: 10px 0; border: none; border-radius: 5px;">Test Cart Functions</button>
+                <p>Review your items and proceed to checkout</p>
             </div>
 
-            <div class="cart-container">
+            <!-- Cart Content -->
+            <div class="cart-container" id="cart-container">
+                <!-- Cart Items -->
                 <div class="cart-items" id="cart-items">
-                    <!-- Cart items will be loaded here -->
-                </div>
-
-                <div class="cart-summary">
-                    <div class="summary-card">
-                        <h3>Order Summary</h3>
-                        <div class="summary-row">
-                            <span>Subtotal:</span>
-                            <span id="subtotal">$0.00</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Shipping:</span>
-                            <span id="shipping">$5.99</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Tax:</span>
-                            <span id="tax">$0.00</span>
-                        </div>
-                        <hr>
-                        <div class="summary-row total">
-                            <span>Total:</span>
-                            <span id="total">$0.00</span>
-                        </div>
-                        <button class="checkout-btn" id="checkout-btn" disabled>Proceed to Checkout</button>
-                        <a href="products.html" class="continue-shopping">Continue Shopping</a>
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your cart...</p>
                     </div>
                 </div>
+
+                <!-- Cart Summary -->
+                <div class="cart-summary">
+                    <div class="summary-header">
+                        💳 Order Summary
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>📦 Subtotal:</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>🚚 Shipping:</span>
+                        <span id="shipping">$5.99</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>📊 Tax:</span>
+                        <span id="tax">$0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>💰 Total:</span>
+                        <span id="total">$0.00</span>
+                    </div>
+                    
+                    <button class="checkout-btn" id="checkout-btn" disabled>
+                        🚀 Proceed to Checkout
+                    </button>
+                    
+                    <a href="products.html" class="continue-shopping">
+                        ← Continue Shopping
+                    </a>
+                </div>
             </div>
 
+            <!-- Empty Cart State -->
             <div class="empty-cart" id="empty-cart" style="display: none;">
                 <div class="empty-cart-content">
+                    <div style="font-size: 4rem; margin-bottom: var(--space-4); opacity: 0.5;">🛒</div>
                     <h2>Your cart is empty</h2>
                     <p>Looks like you haven't added any items to your cart yet.</p>
-                    <a href="products.html" class="shop-now-btn">Start Shopping</a>
+                    <p>Discover amazing products and start shopping!</p>
+                    <a href="products.html" class="shop-now-btn">
+                        🚀 Start Shopping
+                    </a>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Checkout Modal -->
+    <!-- Enhanced Checkout Modal -->
     <div id="checkout-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2>🚀 Checkout</h2>
+                <button class="close">&times;</button>
+            </div>
             <div class="modal-body">
-                <h2>Checkout</h2>
                 <form id="checkout-form">
-                    <div class="form-section">
-                        <h3>Shipping Information</h3>
-                        <div class="form-group">
-                            <label for="full-name">Full Name</label>
-                            <input type="text" id="full-name" required>
+                    <!-- Shipping Information -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">🚚 Shipping Information</h3>
                         </div>
                         <div class="form-group">
-                            <label for="address">Address</label>
-                            <textarea id="address" required></textarea>
+                            <label for="full-name">👤 Full Name</label>
+                            <input type="text" id="full-name" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">🏠 Address</label>
+                            <textarea id="address" placeholder="Enter your complete address" required></textarea>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="city">City</label>
-                                <input type="text" id="city" required>
+                                <label for="city">🏙️ City</label>
+                                <input type="text" id="city" placeholder="City" required>
                             </div>
                             <div class="form-group">
-                                <label for="zip">ZIP Code</label>
-                                <input type="text" id="zip" required>
+                                <label for="zip">📮 ZIP Code</label>
+                                <input type="text" id="zip" placeholder="ZIP Code" required>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="form-section">
-                        <h3>Payment Information</h3>
+                    <!-- Payment Information -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">💳 Payment Information</h3>
+                        </div>
                         <div class="form-group">
-                            <label for="payment-method">Payment Method</label>
+                            <label for="payment-method">💰 Payment Method</label>
                             <select id="payment-method" required>
                                 <option value="">Select Payment Method</option>
-                                <option value="credit-card">Credit Card</option>
-                                <option value="debit-card">Debit Card</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="cash-on-delivery">Cash on Delivery</option>
+                                <option value="credit-card">💳 Credit Card</option>
+                                <option value="debit-card">💳 Debit Card</option>
+                                <option value="paypal">🅿️ PayPal</option>
+                                <option value="cash-on-delivery">💵 Cash on Delivery</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="checkout-summary">
+                    <!-- Order Summary -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title">📋 Order Summary</h3>
+                        </div>
                         <div class="summary-row">
-                            <span>Total Amount:</span>
-                            <span id="checkout-total">$0.00</span>
+                            <span>💰 Total Amount:</span>
+                            <span id="checkout-total" style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color);">$0.00</span>
                         </div>
                     </div>
 
-                    <button type="submit" class="place-order-btn">Place Order</button>
+                    <button type="submit" class="btn btn-success btn-lg" style="width: 100%;">
+                        ✨ Place Order
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Enhanced Footer -->
     <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>E-Shop</h3>
-                <p>Your trusted online shopping destination</p>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ E-Shop</h3>
+                    <p>Your trusted online shopping destination with secure checkout and fast delivery.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>🔗 Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="categories.html">Categories</a></li>
+                        <li><a href="cart.html">Shopping Cart</a></li>
+                        <li><a href="login.html">My Account</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>🛡️ Secure Shopping</h4>
+                    <ul>
+                        <li><a href="#">🔒 SSL Encryption</a></li>
+                        <li><a href="#">💳 Secure Payments</a></li>
+                        <li><a href="#">🚚 Fast Delivery</a></li>
+                        <li><a href="#">↩️ Easy Returns</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="categories.html">Categories</a></li>
-                    <li><a href="cart.html">Cart</a></li>
-                </ul>
+            <div class="footer-bottom">
+                <p>&copy; 2024 E-Shop. All rights reserved. | Secure shopping experience guaranteed 🛡️</p>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 E-Shop. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/cart.js"></script>
+    
+    <script>
+        // Enhanced cart page functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add scroll effect to navbar
+            window.addEventListener('scroll', () => {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Add animations to cart items when they load
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            // Observe cart items for animations
+            setTimeout(() => {
+                const cartItems = document.querySelectorAll('.cart-item');
+                cartItems.forEach((item, index) => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(20px)';
+                    item.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    item.style.transitionDelay = `${index * 0.1}s`;
+                    observer.observe(item);
+                });
+            }, 1000);
+        });
+
+        // Enhanced notification for cart actions
+        function showCartNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <span style="font-size: 1.2rem;">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.transform = 'translateX(100%)';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Add floating animation to empty cart icon
+        const style = document.createElement('style');
+        style.textContent = `
+            .empty-cart-content > div:first-child {
+                animation: float 3s ease-in-out infinite;
+            }
+            
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+            
+            .cart-item {
+                transition: all 0.3s ease;
+            }
+            
+            .cart-item:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
