@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <meta name="description" content="E-Shop Admin Dashboard - Manage products, categories, orders, and users.">
 </head>
+
 <body>
     <header>
         <nav class="navbar" id="navbar">
@@ -29,7 +31,8 @@
                         <a href="categories.html" class="nav-link">🏷️ Categories</a>
                     </li>
                     <li class="nav-item">
-                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count" class="cart-count">0</span></a>
+                        <a href="cart.html" class="nav-link">🛒 Cart <span id="cart-count"
+                                class="cart-count">0</span></a>
                     </li>
                     <li class="nav-item" id="auth-nav">
                         <a href="login.html" class="nav-link">👤 Login</a>
@@ -49,7 +52,7 @@
                         <h1>Admin Dashboard</h1>
                         <p>Manage your e-commerce empire with powerful tools</p>
                     </div>
-                    
+
                     <!-- Enhanced Statistics Cards -->
                     <div class="admin-stats">
                         <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -103,7 +106,8 @@
                         <button class="btn btn-secondary" onclick="refreshCategories()">
                             🔄 Refresh Categories
                         </button>
-                        <button class="btn btn-danger" onclick="deleteAllProducts()" style="background: linear-gradient(135deg, var(--danger-color), #dc2626);">
+                        <button class="btn btn-danger" onclick="deleteAllProducts()"
+                            style="background: linear-gradient(135deg, var(--danger-color), #dc2626);">
                             🗑️ Delete All
                         </button>
                     </div>
@@ -330,7 +334,7 @@
     <!-- Scripts -->
     <script src="js/app.js"></script>
     <script src="js/admin.js"></script>
-    
+
     <script>
         // Enhanced admin dashboard functionality
         document.addEventListener('DOMContentLoaded', () => {
@@ -375,7 +379,7 @@
             // Create enhanced notification
             const notification = document.createElement('div');
             notification.className = `notification notification-${type}`;
-            
+
             const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
             notification.innerHTML = `
                 <div style="display: flex; align-items: center; gap: var(--space-2);">
@@ -400,7 +404,7 @@
         function addLoadingState(button, originalText) {
             button.disabled = true;
             button.innerHTML = `<div class="loading-spinner" style="width: 16px; height: 16px; margin-right: var(--space-2);"></div> Loading...`;
-            
+
             return () => {
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -408,4 +412,5 @@
         }
     </script>
 </body>
+
 </html>
